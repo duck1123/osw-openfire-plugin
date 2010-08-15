@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.pep;
 
@@ -52,19 +52,19 @@ public class IQPEPHandler extends IQHandler {
 	@SuppressWarnings("unchecked")
 	@Override
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-        final Element childElement = packet.getChildElement();
-        final List<Element> pubsubElements = childElement.elements();	
+		final Element childElement = packet.getChildElement();
+		final List<Element> pubsubElements = childElement.elements();
 
-        if (pubsubElements != null && pubsubElements.size() > 0) {
-        	Element actionElement = pubsubElements.get(0);
-        	Attribute node = actionElement.attribute("node");
-        	PEPNodeHandler handler = getHandler(node.getValue());
-        	if (handler != null) {
-        		return handler.handleIQ(packet);
-        	}
+		if (pubsubElements != null && pubsubElements.size() > 0) {
+			Element actionElement = pubsubElements.get(0);
+			Attribute node = actionElement.attribute("node");
+			PEPNodeHandler handler = getHandler(node.getValue());
+			if (handler != null) {
+				return handler.handleIQ(packet);
+			}
         }
         
-       	return XMPPServer.getInstance().getIQPEPHandler().handleIQ(packet);
+		return XMPPServer.getInstance().getIQPEPHandler().handleIQ(packet);
 	}
 	
 	public void addHandler(PEPNodeHandler handler) {
@@ -75,5 +75,4 @@ public class IQPEPHandler extends IQHandler {
 	public PEPNodeHandler getHandler(String node) {
 		return handlers.get(node);
 	}
-
 }

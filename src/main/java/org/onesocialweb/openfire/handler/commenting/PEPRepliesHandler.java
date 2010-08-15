@@ -18,8 +18,6 @@ public class PEPRepliesHandler extends PEPNodeHandler {
 	
 	private XMPPServer server;
 	
-
-	
 	private Map<String, PEPCommandHandler> handlers = new ConcurrentHashMap<String, PEPCommandHandler>();
 
 	public PEPRepliesHandler() {
@@ -43,12 +41,12 @@ public class PEPRepliesHandler extends PEPNodeHandler {
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
 		// We search for a handler based on the element name
 		// and process the packet with the handler if found.
-        final Element childElement = packet.getChildElement();
-        final List<Element> pubsubElements = childElement.elements();	
+		final Element childElement = packet.getChildElement();
+		final List<Element> pubsubElements = childElement.elements();
 
-        if (pubsubElements != null && pubsubElements.size() > 0) {
-        	Element actionElement = pubsubElements.get(0);
-        	PEPCommandHandler handler = getHandler(actionElement.getName());
+		if (pubsubElements != null && pubsubElements.size() > 0) {
+			Element actionElement = pubsubElements.get(0);
+			PEPCommandHandler handler = getHandler(actionElement.getName());
 			if (handler != null) {
 				return handler.handleIQ(packet);
 			}
@@ -70,7 +68,4 @@ public class PEPRepliesHandler extends PEPNodeHandler {
 	public PEPCommandHandler getHandler(String name) {
 		return handlers.get(name);
 	}
-	
-
-
 }

@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.handler.activity;
@@ -40,7 +40,7 @@ public class ActivityQueryHandler extends PEPCommandHandler {
 
 	public static final String COMMAND = "items";
 	
-	private UserManager userManager; 
+	private UserManager userManager;
 
 	public ActivityQueryHandler() {
 		super("OneSocialWeb - Query a user activities");
@@ -68,8 +68,10 @@ public class ActivityQueryHandler extends PEPCommandHandler {
 			}
 			
 			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) && target != null && target.getNode() != null 
-					&& userManager.isRegisteredUser(target.getNode()))) {
+			if (!(packet.getType().equals(IQ.Type.get) &&
+				target != null &&
+				target.getNode() != null &&
+				userManager.isRegisteredUser(target.getNode()))) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);
@@ -98,7 +100,6 @@ public class ActivityQueryHandler extends PEPCommandHandler {
 			
 			// Return and send the result packet
 			return result;
-			
 		} catch (Exception e) {
 			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
 			IQ result = IQ.createResultIQ(packet);

@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.activity;
 
@@ -36,14 +36,15 @@ public class IQSubscribeInterceptor implements PacketInterceptor {
 		server = XMPPServer.getInstance();
 	}
 
-	public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed) throws PacketRejectedException {
+	public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed)
+		throws PacketRejectedException {
 
 		// We only care for incoming IQ that have not yet been processed
 		if (incoming && !processed && packet instanceof IQ) {
 
-			final IQ  iq		= (IQ) packet;
+			final IQ  iq = (IQ) packet;
 			final JID fromJID = iq.getFrom();
-			final JID toJID 	= iq.getTo();
+			final JID toJID = iq.getTo();
 
 			// Must be iq of type set and sent to remote users
 			if (!iq.getType().equals(IQ.Type.set) || server.isLocal(toJID)) {
@@ -67,7 +68,8 @@ public class IQSubscribeInterceptor implements PacketInterceptor {
 			
 			// Relating to the microblogging node
 			Attribute nodeAttribute = commandElement.attribute("node");
-			if (!(nodeAttribute != null && nodeAttribute.getValue().equals(PEPActivityHandler.NODE))) {
+			if (!(nodeAttribute != null &&
+				nodeAttribute.getValue().equals(PEPActivityHandler.NODE))) {
 				return;
 			}
 			
@@ -77,7 +79,6 @@ public class IQSubscribeInterceptor implements PacketInterceptor {
 			} else {
 				ActivityManager.getInstance().unsubscribe(fromJID.toBareJID(), toJID.toBareJID());
 			}
-
 		}
 	}
 }

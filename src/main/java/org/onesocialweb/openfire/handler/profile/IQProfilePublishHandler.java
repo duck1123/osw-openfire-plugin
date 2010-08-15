@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.profile;
 
@@ -62,7 +62,7 @@ public class IQProfilePublishHandler extends IQHandler {
 		// error result packet
 		try {
 
-			// A valid request is an IQ of type set, 
+			// A valid request is an IQ of type set,
 			if (!packet.getType().equals(IQ.Type.set)) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());

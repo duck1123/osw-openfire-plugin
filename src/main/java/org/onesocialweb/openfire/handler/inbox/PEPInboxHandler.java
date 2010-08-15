@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.inbox;
 
@@ -57,12 +57,12 @@ public class PEPInboxHandler extends PEPNodeHandler {
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
 		// We search for a handler based on the element name
 		// and process the packet with the handler if found.
-        final Element childElement = packet.getChildElement();
-        final List<Element> pubsubElements = childElement.elements();	
+		final Element childElement = packet.getChildElement();
+		final List<Element> pubsubElements = childElement.elements();
 
-        if (pubsubElements != null && pubsubElements.size() > 0) {
-        	Element actionElement = pubsubElements.get(0);
-        	PEPCommandHandler handler = getHandler(actionElement.getName());
+		if (pubsubElements != null && pubsubElements.size() > 0) {
+			Element actionElement = pubsubElements.get(0);
+			PEPCommandHandler handler = getHandler(actionElement.getName());
 			if (handler != null) {
 				return handler.handleIQ(packet);
 			}
@@ -84,5 +84,4 @@ public class PEPInboxHandler extends PEPNodeHandler {
 	public PEPCommandHandler getHandler(String name) {
 		return handlers.get(name);
 	}
-
 }

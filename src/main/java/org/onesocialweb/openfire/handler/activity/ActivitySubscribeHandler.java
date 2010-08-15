@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.handler.activity;
@@ -34,7 +34,7 @@ public class ActivitySubscribeHandler extends PEPCommandHandler {
 
 	public static final String COMMAND = "subscribe";
 	
-	private UserManager userManager; 
+	private UserManager userManager;
 
 	public ActivitySubscribeHandler() {
 		super("OneSocialWeb - Subscribe to a user activities");
@@ -58,8 +58,10 @@ public class ActivitySubscribeHandler extends PEPCommandHandler {
 		try {
 			
 			// A valid request is an IQ of type set, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.set) && recipient != null && recipient.getNode() != null 
-					&& userManager.isRegisteredUser(recipient.getNode()))) {
+			if (!(packet.getType().equals(IQ.Type.set) &&
+				recipient != null &&
+				recipient.getNode() != null &&
+				userManager.isRegisteredUser(recipient.getNode()))) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);

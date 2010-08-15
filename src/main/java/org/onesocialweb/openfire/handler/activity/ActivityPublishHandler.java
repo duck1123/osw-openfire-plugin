@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.activity;
 
@@ -53,7 +53,7 @@ public class ActivityPublishHandler extends PEPCommandHandler {
 		return COMMAND;
 	}
 
-	@SuppressWarnings( { "deprecation", "unchecked" })
+	@SuppressWarnings({"deprecation", "unchecked"})
 	@Override
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
 		final JID sender = packet.getFrom();
@@ -64,7 +64,7 @@ public class ActivityPublishHandler extends PEPCommandHandler {
 		// error result packet
 		try {
 
-			// A valid request is an IQ of type set, 
+			// A valid request is an IQ of type set,
 			if (!packet.getType().equals(IQ.Type.set)) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
@@ -109,15 +109,14 @@ public class ActivityPublishHandler extends PEPCommandHandler {
 					ActivityEntry activity = reader.readEntry(new ElementAdapter(entry));
 					Log.debug("ActivityPublishHandler received activity: " + activity);
 					try {
-						if ((activity.getId()!=null) && (activity.getId().length()!=0))
+						if ((activity.getId() != null) && (activity.getId().length() != 0)) {
 							activityManager.updateActivity(sender.toBareJID(), activity);
-						else if (activity.getParentId()!=null){						
-									activityManager.commentActivity(sender.toBareJID(), activity);									
+						} else if (activity.getParentId() != null) {
+							activityManager.commentActivity(sender.toBareJID(), activity);
+						} else {
+							activityManager.publishActivity(sender.toBareJID(), activity);
+							itemIds.add(activity.getId());
 						}
-						else{							
-									activityManager.publishActivity(sender.toBareJID(), activity);
-									itemIds.add(activity.getId());
-							}														
 					} catch (UserNotFoundException e) {}
 				}
 			}
@@ -148,5 +147,4 @@ public class ActivityPublishHandler extends PEPCommandHandler {
 		userManager = server.getUserManager();
 		activityManager = ActivityManager.getInstance();
 	}
-	
 }

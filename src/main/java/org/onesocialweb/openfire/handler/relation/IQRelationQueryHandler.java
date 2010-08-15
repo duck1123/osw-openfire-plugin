@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.relation;
 
@@ -43,7 +43,7 @@ public class IQRelationQueryHandler extends IQHandler {
 	
 	private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
 
-	private UserManager userManager; 
+	private UserManager userManager;
 
 	public IQRelationQueryHandler() {
 		super("OneSocialWeb - Query a user relations");
@@ -71,8 +71,10 @@ public class IQRelationQueryHandler extends IQHandler {
 			}
 			
 			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) && target != null && target.getNode() != null 
-					&& userManager.isRegisteredUser(target.getNode()))) {
+			if (!(packet.getType().equals(IQ.Type.get) &&
+				target != null &&
+				target.getNode() != null &&
+				userManager.isRegisteredUser(target.getNode()))) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);
@@ -93,7 +95,6 @@ public class IQRelationQueryHandler extends IQHandler {
 			result.setChildElement((org.dom4j.Element) query);
 			// Return and send the result packet
 			return result;
-			
 		} catch (Exception e) {
 			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
 			IQ result = IQ.createResultIQ(packet);
