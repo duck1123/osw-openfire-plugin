@@ -96,8 +96,8 @@ public class MessageEventInterceptor implements PacketInterceptor {
 					PEPActivityHandler.NODE)) {
 				Log.debug("Processing an activity event from " + fromJID + " to " + toJID);
 				final ActivityDomReader reader = new PersistentActivityDomReader();
-				List<Element> items = (List<Element>) itemsElement.elements("item")
-				if ((items != null) && (items.size() != 0)){
+				List<Element> items = (List<Element>) itemsElement.elements("item");
+				if ((items != null) && (items.size() != 0)) {
 					for (Element itemElement :items) {
 						ActivityEntry activity = reader.readEntry(new ElementAdapter(itemElement.element("entry")));
 						try {
