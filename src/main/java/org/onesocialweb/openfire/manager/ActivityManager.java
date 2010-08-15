@@ -196,6 +196,7 @@ public class ActivityManager {
 		actor.setUri(userJID);
 		actor.setName(user.getName());
 		actor.setEmail(user.getEmail());
+		commentEntry.setActor(actor);
 		
 	
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
