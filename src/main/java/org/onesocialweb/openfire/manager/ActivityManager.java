@@ -514,7 +514,23 @@ public class ActivityManager {
 
 		final Message message = new Message();
 		message.setFrom(fromJID);
-		message.setBody("New activity: " + entry.getTitle());
+		message.setSubject("New activity");
+		
+		String messageBody = "";
+		
+		if (entry.hasRecipients()) {
+			messageBody += "Recipients: ";
+			
+			for (AtomReplyTo recipient : entry.getRecipients()) {
+				messageBody += recipient.getHref() + "; ";
+			}
+			
+			messageBody += "\n\n";
+		}
+        
+		messageBody += entry.getTitle();
+		
+		message.setBody(messageBody);
 		message.setType(Message.Type.headline);
 		org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
 		org.dom4j.Element itemsElement = eventElement.addElement("items");
