@@ -3,3 +3,4 @@
 lib/osw-model.jar
 bin/
 target
+semantic.cache
