@@ -5,6 +5,7 @@
   <artifactId>osw-openfire-plugin</artifactId>
   <version>0.6.1-SNAPSHOT</version>
   <name>osw-openfire-plugin</name>
+  <packaging>openfire-plugin</packaging>
   <description>Adds onesocialweb protocol support to an openfire server</description>
   <url>http://onesocialweb.org/</url>
 
