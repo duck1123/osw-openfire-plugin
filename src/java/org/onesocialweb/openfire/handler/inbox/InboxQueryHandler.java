@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.inbox;
 
@@ -39,7 +39,7 @@ import org.xmpp.packet.PacketError;
 public class InboxQueryHandler extends PEPCommandHandler {
 
 	public static final String COMMAND = "items";
-		
+	
 	private InboxManager inboxManager;
 	
 	private UserManager userManager;
@@ -53,10 +53,9 @@ public class InboxQueryHandler extends PEPCommandHandler {
 		return COMMAND;
 	}
 	
-	@SuppressWarnings( { "deprecation" })
+	@SuppressWarnings({"deprecation"})
 	@Override
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		
 		final JID sender = packet.getFrom();
 		final JID recipient = packet.getTo();
 		
@@ -108,10 +107,9 @@ public class InboxQueryHandler extends PEPCommandHandler {
 				itemElement.addAttribute("id", message.getActivity().getId());
 				itemElement.add((org.dom4j.Element) entryElement);
 			}
-						
+			
 			// Return and send the result packet
 			return result;
-			
 		} catch (Exception e) {
 			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
 			IQ result = IQ.createResultIQ(packet);

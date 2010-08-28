@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.profile;
 
@@ -42,7 +42,7 @@ public class IQProfileQueryHandler extends IQHandler {
 	
 	private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
 
-	private UserManager userManager; 
+	private UserManager userManager;
 
 	public IQProfileQueryHandler() {
 		super("OneSocialWeb - Query a user activities");
@@ -70,8 +70,10 @@ public class IQProfileQueryHandler extends IQHandler {
 			}
 			
 			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) && target != null && target.getNode() != null 
-					&& userManager.isRegisteredUser(target.getNode()))) {
+			if (!(packet.getType().equals(IQ.Type.get) &&
+				target != null &&
+				target.getNode() != null &&
+				userManager.isRegisteredUser(target.getNode()))) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);
@@ -86,7 +88,7 @@ public class IQProfileQueryHandler extends IQHandler {
 			DOMDocument domDocument = new DOMDocument();
 			IQ result = IQ.createResultIQ(packet);
 			Element query = (Element) domDocument.appendChild(domDocument.createElementNS(NAMESPACE, NAME));
-			if (profile != null) { 
+			if (profile != null) {
 				writer.toElement(profile, query);
 			} else {
 				query.appendChild(domDocument.createElementNS(VCard4.NAMESPACE, VCard4.VCARD_ELEMENT));

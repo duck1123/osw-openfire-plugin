@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.manager;
 
@@ -36,9 +36,9 @@ import org.onesocialweb.openfire.model.vcard4.PersistentProfile;
 /**
  * The profile manager is a singleton class taking care of all the business
  * logic related to querying, creating, and updating a user profile.
- * 
+ *
  * @author eschenal
- * 
+ *
  */
 public class ProfileManager {
 
@@ -59,9 +59,9 @@ public class ProfileManager {
 	/**
 	 * Retrieves the profile of the target entity has can be seen by the
 	 * requesting entity.
-	 * 
+	 *
 	 * TODO ACL is not yet implemented. All fields are returned at this stage.
-	 * 
+	 *
 	 * @param requestorJID
 	 *            the entity requesting the profile
 	 * @param targetJID
@@ -94,22 +94,25 @@ public class ProfileManager {
 						canSee=true;
 					for (AclRule rule: rules)
 					{
-						if ((rule.hasAction(viewAction)) && (AclManager.canSee(targetJID, rule, requestorJID)))						
-							canSee=true;										
+						if ((rule.hasAction(viewAction)) &&
+							(AclManager.canSee(targetJID, rule, requestorJID))) {
+							canSee=true;
+						}
 					}
-					if (canSee)
-						canSeefields.add(field);						
+					if (canSee) {
+						canSeefields.add(field);
+					}
 				}
 				
-				profile.removeAll();				
-				try{
-					for (Field f: canSeefields){						
-						f.setAclRules(new ArrayList<AclRule>());					
+				profile.removeAll();
+				try {
+					for (Field f : canSeefields) {
+						f.setAclRules(new ArrayList<AclRule>());
 						profile.addField(f);
-					}				
-				}catch (CardinalityException ce){
-				}catch (UnsupportedFieldException ufe){					
-				}					
+					}
+				} catch (CardinalityException ce) {
+				} catch (UnsupportedFieldException ufe){
+				}
 				return profile;
 			}
 		} else {
@@ -119,10 +122,10 @@ public class ProfileManager {
 
 	/**
 	 * Create or update the profile of a user.
-	 * 
-	 * If the user already has a profile defined, that profile will first be deleted and 
+	 *
+	 * If the user already has a profile defined, that profile will first be deleted and
 	 * replaced by the new profile.
-	 * 
+	 *
 	 * @param userJID the user whose profile is to be changed
 	 * @param profile the new profile
 	 * @throws UserNotFoundException
@@ -153,7 +156,6 @@ public class ProfileManager {
 	 * Private constructor to enforce the singleton
 	 */
 	private ProfileManager() {
-		//
 		aclFactory = new PersistentAclFactory();
 	}
 }

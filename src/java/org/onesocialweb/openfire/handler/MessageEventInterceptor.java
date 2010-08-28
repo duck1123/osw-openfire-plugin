@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler;
 
@@ -68,14 +68,14 @@ public class MessageEventInterceptor implements PacketInterceptor {
 			final JID fromJID = message.getFrom();
 			final JID toJID = message.getTo();
 
-			// We are only interested by message to bareJID (we don't touch the one sent to fullJID)
+			// We are only interested in messages sent to bareJIDs
+			// (we don't touch ones sent to fullJIDs)
 			if (!toJID.toBareJID().equalsIgnoreCase(toJID.toString())) {
 				return;
 			}
 
 			// We only care for messaes to local users
-			if (!server.isLocal(toJID)
-					|| !server.getUserManager().isRegisteredUser(toJID)) {
+			if (!server.isLocal(toJID) || !server.getUserManager().isRegisteredUser(toJID)) {
 				return;
 			}
 
@@ -88,26 +88,24 @@ public class MessageEventInterceptor implements PacketInterceptor {
 
 			// That contains items
 			Element itemsElement = eventElement.element("items");
-			if (itemsElement == null || itemsElement.attribute("node") == null) 
+			if (itemsElement == null || itemsElement.attribute("node") == null)
 				return;
 
 			// Relating to the microblogging node
 			if (itemsElement.attribute("node").getValue().equals(
 					PEPActivityHandler.NODE)) {
-								
-								
-				Log.debug("Processing an activity event from " + fromJID
-						+ " to " + toJID);
+				Log.debug("Processing an activity event from " + fromJID + " to " + toJID);
 				final ActivityDomReader reader = new PersistentActivityDomReader();
-				List<Element> items=(List<Element>) itemsElement.elements("item"); 
-				if ((items!=null) && (items.size()!=0)){
+				List<Element> items = (List<Element>) itemsElement.elements("item");
+				if ((items != null) && (items.size() != 0)) {
 					for (Element itemElement :items) {
 						ActivityEntry activity = reader.readEntry(new ElementAdapter(itemElement.element("entry")));
-						try {							
-							if (activity.getParentId()!=null)
-								ActivityManager.getInstance().handleComment(fromJID.toBareJID(), toJID.toBareJID(),activity);
-							else 
-								ActivityManager.getInstance().handleMessage(fromJID.toBareJID(), toJID.toBareJID(),activity);														
+						try {
+							if (activity.getParentId() != null) {
+								ActivityManager.getInstance().handleComment(fromJID.toBareJID(), toJID.toBareJID(), activity);
+							} else {
+								ActivityManager.getInstance().handleMessage(fromJID.toBareJID(), toJID.toBareJID(), activity);
+							}
 						} catch (UserNotFoundException e){
 							throw new PacketRejectedException();
 						} catch (InvalidActivityException e) {
@@ -118,8 +116,7 @@ public class MessageEventInterceptor implements PacketInterceptor {
 							throw new PacketRejectedException();
 						}
 					}
-				} else if (itemsElement.element("retract")!=null)
-				{					
+				} else if (itemsElement.element("retract") != null) {
 					Element retractElement = itemsElement.element("retract");
 					String activityId=reader.readActivityId(new ElementAdapter(retractElement));
 					ActivityManager.getInstance().deleteMessage(activityId);
@@ -137,11 +134,9 @@ public class MessageEventInterceptor implements PacketInterceptor {
 			}
 			
 			// or a relation event
-			else if (itemsElement.attribute("node").getValue().equals(
-					RelationManager.NODE)) {
+			else if (itemsElement.attribute("node").getValue().equals(RelationManager.NODE)) {
 				final RelationDomReader reader = new PersistentRelationDomReader();
-				for (Element itemElement : (List<Element>) itemsElement
-						.elements("item")) {
+				for (Element itemElement : (List<Element>) itemsElement.elements("item")) {
 					Relation relation = reader.readElement(new ElementAdapter(
 							itemElement.element("relation")));
 					try {
@@ -176,7 +171,7 @@ public class MessageEventInterceptor implements PacketInterceptor {
 				}
 			}
 		}
-
+		
 		return recipientFullJIDs;
 	}
 }

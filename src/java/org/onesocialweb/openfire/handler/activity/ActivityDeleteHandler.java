@@ -38,8 +38,7 @@ public class ActivityDeleteHandler  extends PEPCommandHandler {
 		
 		JID sender = packet.getFrom();
 		JID target = packet.getTo();
-		String id=packet.getID();
-		
+		String id = packet.getID();
 		
 		// Process the request inside a try/catch so that unhandled exceptions
 		// (oufofbounds etc...) can trigger a server error and we can send a
@@ -47,7 +46,7 @@ public class ActivityDeleteHandler  extends PEPCommandHandler {
 		
 		try {
 			
-			// A valid request is an IQ of type set, 
+			// A valid request is an IQ of type set,
 			if (!packet.getType().equals(IQ.Type.set)) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
@@ -76,9 +75,9 @@ public class ActivityDeleteHandler  extends PEPCommandHandler {
 			Element pubsubElement = packet.getChildElement();
 			Element retractElement = pubsubElement.element("retract");
 			Element item = (Element)retractElement.elements("item").get(0);
-			String activityId=reader.readActivityId(new ElementAdapter(item));
+			String activityId = reader.readActivityId(new ElementAdapter(item));
 			
-			if ((activityId==null) || (activityId.length()==0)){						
+			if ((activityId == null) || (activityId.length() == 0)){
 					IQ result = IQ.createResultIQ(packet);
 					result.setChildElement(packet.getChildElement().createCopy());
 					result.setError(PacketError.Condition.item_not_found);
@@ -102,12 +101,11 @@ public class ActivityDeleteHandler  extends PEPCommandHandler {
 			result.setError(PacketError.Condition.internal_server_error);
 			return result;
 		}
-		
 	}
 	
 	@Override
 	public void initialize(XMPPServer server) {
-		super.initialize(server);		
+		super.initialize(server);
 		userManager = server.getUserManager();
 		activityManager = ActivityManager.getInstance();
 	}

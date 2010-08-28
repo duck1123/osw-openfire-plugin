@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.handler.activity;
 
@@ -49,7 +49,7 @@ public class ActivitySubscribersHandler extends PEPCommandHandler {
 		return COMMAND;
 	}
 
-	@SuppressWarnings( { "deprecation"})
+	@SuppressWarnings({"deprecation"})
 	@Override
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
 		JID sender = packet.getFrom();
@@ -65,8 +65,10 @@ public class ActivitySubscribersHandler extends PEPCommandHandler {
 			}
 			
 			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) && recipient != null && recipient.getNode() != null 
-					&& userManager.isRegisteredUser(recipient.getNode()))) {
+			if (!(packet.getType().equals(IQ.Type.get) &&
+				recipient != null &&
+				recipient.getNode() != null &&
+				userManager.isRegisteredUser(recipient.getNode()))) {
 				IQ result = IQ.createResultIQ(packet);
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);
@@ -104,5 +106,4 @@ public class ActivitySubscribersHandler extends PEPCommandHandler {
 		userManager = server.getUserManager();
 		activityManager = ActivityManager.getInstance();
 	}
-	
 }

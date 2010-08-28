@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.manager;
 
@@ -67,9 +67,9 @@ import org.xmpp.packet.Message;
 /**
  * The activity manager is a singleton class taking care of all the business
  * logic related to querying, creating, updating and deleting activities.
- * 
+ *
  * @author eschenal
- * 
+ *
  */
 public class ActivityManager {
 
@@ -89,7 +89,7 @@ public class ActivityManager {
 	}
 
 	/**
-	 * Class dependencies 
+	 * Class dependencies
 	 * TODO Make this a true dependency injection
 	 */
 	private final ActivityFactory activityFactory;
@@ -103,7 +103,7 @@ public class ActivityManager {
 	 * activity-actor element is overwrittern using the user profile data to
 	 * avoid spoofing. Notifications messages are sent to the users subscribed
 	 * to this user activities.
-	 * 
+	 *
 	 * @param user
 	 *            The user who the activity belongs to
 	 * @param entry
@@ -140,7 +140,7 @@ public class ActivityManager {
 	 * activity-actor element is overwrittern using the user profile data to
 	 * avoid spoofing. Notifications messages are sent to the users subscribed
 	 * to this user activities.
-	 * 
+	 *
 	 * @param user
 	 *            The user who the activity belongs to
 	 * @param entry
@@ -158,13 +158,14 @@ public class ActivityManager {
 		// Persist the activities
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
 		em.getTransaction().begin();
-		PersistentActivityEntry oldEntry=em.find(PersistentActivityEntry.class, entry.getId());
-		
-		if ((oldEntry==null) || (!oldEntry.getActor().getUri().equalsIgnoreCase(userJID)))
+		PersistentActivityEntry oldEntry = em.find(PersistentActivityEntry.class, entry.getId());
+
+		if ((oldEntry == null) || (!oldEntry.getActor().getUri().equalsIgnoreCase(userJID)))
 			throw new UnauthorizedException();
 		
-		if (oldEntry!=null)
+		if (oldEntry != null) {
 			em.remove(oldEntry);
+		}
 		
 		entry.setActor(actor);
 		entry.setPublished(Calendar.getInstance().getTime());
@@ -182,14 +183,15 @@ public class ActivityManager {
 	 * activity-actor element is overwrittern using the user profile data to
 	 * avoid spoofing. Notifications messages are sent to the users subscribed
 	 * to this user activities.
-	 * 
+	 *
 	 * @param user
 	 *            The user who the activity belongs to
 	 * @param entry
 	 *            The activity entry to update
 	 * @throws UserNotFoundException
 	 */
-	public void commentActivity(String userJID, ActivityEntry commentEntry) throws UserNotFoundException, UnauthorizedException {
+	public void commentActivity(String userJID, ActivityEntry commentEntry)
+		throws UserNotFoundException, UnauthorizedException {
 		// Overide the actor to avoid spoofing
 		User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
 		ActivityActor actor = activityFactory.actor();
@@ -201,16 +203,17 @@ public class ActivityManager {
 	
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
 		em.getTransaction().begin();
-				
+		
 		//validate that we have visibility of the original post...
-		String idParent=commentEntry.getParentId();		
-		PersistentActivityEntry originalEntry=em.find(PersistentActivityEntry.class, idParent);		
-		if (originalEntry==null) 
+		String idParent = commentEntry.getParentId();
+		PersistentActivityEntry originalEntry = em.find(PersistentActivityEntry.class, idParent);
+		
+		if (originalEntry == null) {
 			throw new UnauthorizedException();
-				
+		}
 		
 		// Broadcast a notification to the owner of the original post...
-		notifyComment(userJID, originalEntry.getActor().getUri() , commentEntry);
+		notifyComment(userJID, originalEntry.getActor().getUri(), commentEntry);
 	}
 	
 	public void deleteActivity(String fromJID, String activityId) throws UnauthorizedException {
@@ -218,20 +221,22 @@ public class ActivityManager {
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
 		em.getTransaction().begin();
 		
-		PersistentActivityEntry activity= em.find(PersistentActivityEntry.class, activityId);
-		
-		if ((activity==null) || (!activity.getActor().getUri().equalsIgnoreCase(fromJID)))
+		PersistentActivityEntry activity = em.find(PersistentActivityEntry.class, activityId);
+
+		if ((activity==null) || (!activity.getActor().getUri().equalsIgnoreCase(fromJID))) {
 			throw new UnauthorizedException();
-		
-		if (activity.hasReplies()){
+		}
+
+		if (activity.hasReplies()) {
 			Query query = em.createQuery("SELECT x FROM ActivityEntry x WHERE x.parentId = ?1");
-			query.setParameter(1, activity.getId());		
+			query.setParameter(1, activity.getId());
 			List<ActivityEntry> replies = query.getResultList();
-			for (ActivityEntry reply:replies){
+			
+			for (ActivityEntry reply : replies) {
 				em.remove(reply);
 			}
 		}
-			
+		
 		em.remove(activity);
 		
 		em.getTransaction().commit();
@@ -240,7 +245,6 @@ public class ActivityManager {
 		notifyDelete(fromJID, activityId);
 	}
 	
-
 	
 	public void deleteMessage(String activityId)  {
 		
@@ -248,21 +252,21 @@ public class ActivityManager {
 		em.getTransaction().begin();
 		
 		Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
-		query.setParameter(1, activityId);		
+		query.setParameter(1, activityId);
 		List<ActivityMessage> messages = query.getResultList();
 		for (ActivityMessage message:messages){
 			em.remove(message);
 		}
-
+		
 		em.getTransaction().commit();
 		em.close();
-
+	
 	}
 
 	/**
 	 * Retrieve the last activities of the target user, taking into account the
 	 * access rights of the requesting user.
-	 * 
+	 *
 	 * @param requestorJID
 	 *            the user requesting the activities
 	 * @param targetJID
@@ -272,14 +276,22 @@ public class ActivityManager {
 	 * @throws UserNotFoundException
 	 */
 	@SuppressWarnings("unchecked")
-	public List<ActivityEntry> getActivities(String requestorJID, String targetJID) throws UserNotFoundException {
+	public List<ActivityEntry> getActivities(String requestorJID, String targetJID)
+		throws UserNotFoundException {
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		Query query = em.createQuery("SELECT DISTINCT entry FROM ActivityEntry entry" + "             JOIN entry.rules rule "
-				+ "             JOIN rule.actions action " + "             JOIN rule.subjects subject "
-				+ "             WHERE entry.actor.uri = :target " + "             AND action.name = :view "
-				+ "             AND action.permission = :grant " + "             AND (subject.type = :everyone "
-				+ "                  OR (subject.type = :group_type " + "                     AND subject.name IN (:groups)) "
-				+ "                  OR (subject.type = :person " + "                      AND subject.name = :jid)) ORDER BY entry.published DESC");
+		Query query = em.createQuery("SELECT DISTINCT entry FROM ActivityEntry entry" +
+									"    JOIN entry.rules rule " +
+									"    JOIN rule.actions action " +
+									"    JOIN rule.subjects subject " +
+									"    WHERE entry.actor.uri = :target " +
+									"    AND action.name = :view " +
+									"    AND action.permission = :grant " +
+									"    AND (subject.type = :everyone " +
+									"        OR (subject.type = :group_type " +
+									"            AND subject.name IN (:groups)) " +
+									"        OR (subject.type = :person " +
+									"            AND subject.name = :jid)) " +
+									"    ORDER BY entry.published DESC");
 
 		// Parametrize the query
 		query.setParameter("target", targetJID);
@@ -302,7 +314,7 @@ public class ActivityManager {
 	 * received by a user in these conditions: - the local user has subscribed
 	 * to the remote user activities - the local user is "mentionned" in this
 	 * activity - this activity relates to another activity of the local user
-	 * 
+	 *
 	 * @param remoteJID
 	 *            the entity sending the message
 	 * @param localJID
@@ -312,7 +324,8 @@ public class ActivityManager {
 	 * @throws InvalidActivityException
 	 * @throws AccessDeniedException
 	 */
-	public synchronized void handleMessage(String remoteJID, String localJID, ActivityEntry activity) throws InvalidActivityException, AccessDeniedException {
+	public synchronized void handleMessage(String remoteJID, String localJID, ActivityEntry activity)
+		throws InvalidActivityException, AccessDeniedException {
 
 		// Validate the activity
 		if (activity == null || !activity.hasId()) {
@@ -338,11 +351,11 @@ public class ActivityManager {
 		
 		//in case of an update the message will already exist in the DB
 		Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
-		query.setParameter(1, activity.getId());		
+		query.setParameter(1, activity.getId());
 		List<ActivityMessage> messages = query.getResultList();
 		
 		em.getTransaction().begin();
-		for (ActivityMessage oldMessage:messages){
+		for (ActivityMessage oldMessage : messages){
 			if (oldMessage.getRecipient().equalsIgnoreCase(localJID))
 				em.remove(oldMessage);
 		}
@@ -353,67 +366,69 @@ public class ActivityManager {
 		em.persist(message);
 		em.getTransaction().commit();
 		em.close();
-				
 	}
-	
-	public synchronized void handleComment(String remoteJID, String localJID, ActivityEntry commentEntry) throws UnauthorizedException, UserNotFoundException, InvalidActivityException, AccessDeniedException {
-	
+
+	public synchronized void handleComment(String remoteJID, String localJID, ActivityEntry commentEntry)
+		throws UnauthorizedException, UserNotFoundException,
+			InvalidActivityException, AccessDeniedException {
+
 		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
 		em.getTransaction().begin();
-		String parentJID=commentEntry.getParentJID();
-		
+		String parentJID = commentEntry.getParentJID();
+
 		if (parentJID.equalsIgnoreCase(localJID)){
 			// store the comment
 			// first we update it... comment should already have all the links about
-			//being a reply...
+			// being a reply...
 			commentEntry.setId(DefaultAtomHelper.generateId());
 			for (ActivityObject object : commentEntry.getObjects()) {
 				object.setId(DefaultAtomHelper.generateId());
-			}														
+			}
 			commentEntry.setPublished(Calendar.getInstance().getTime());
 			em.persist(commentEntry);
 		}
 		
-		
 		PersistentActivityEntry parentActivity = em.find(PersistentActivityEntry.class, commentEntry.getParentId());
-		
-		if (parentActivity==null)
-			throw new UnauthorizedException();	
 
-		
-		//update original...to increase the number of replies, unless the comment 
-		//already exists which means that the activity was already increased once
-		
-		String domainOrigin= new JID(parentActivity.getActor().getUri()).getDomain();
-		String domainLocal= new JID (localJID).getDomain();
-		
-
-		boolean alreadyUpdated=domainOrigin.equalsIgnoreCase(domainLocal) && !localJID.equalsIgnoreCase(parentActivity.getActor().getUri());
-		
-		if (!alreadyUpdated){
-			if (parentActivity.hasReplies()){
-				AtomLink repliesLink= parentActivity.getRepliesLink();	
-				parentActivity.removeLink(repliesLink);
-				repliesLink.setCount(repliesLink.getCount()+1);					
-				parentActivity.addLink(repliesLink);
-			}			
-			else
-				parentActivity.addLink(atomFactory.link(null, "replies", null, "application/atom+xml", 1));
-
-			em.remove(parentActivity);	
-			em.persist(parentActivity);		
+		if (parentActivity == null) {
+			throw new UnauthorizedException();
 		}
+
+		// update original...to increase the number of replies, unless the comment
+		// already exists which means that the activity was already increased once
+
+		String domainOrigin = new JID(parentActivity.getActor().getUri()).getDomain();
+		String domainLocal = new JID(localJID).getDomain();
+
+
+		boolean alreadyUpdated = domainOrigin.equalsIgnoreCase(domainLocal) &&
+			!localJID.equalsIgnoreCase(parentActivity.getActor().getUri());
+
+		if (!alreadyUpdated) {
+			if (parentActivity.hasReplies()) {
+				AtomLink repliesLink = parentActivity.getRepliesLink();
+				parentActivity.removeLink(repliesLink);
+				repliesLink.setCount(repliesLink.getCount() + 1);
+				parentActivity.addLink(repliesLink);
+			} else {
+				parentActivity.addLink(atomFactory.link(null, "replies", null, "application/atom+xml", 1));
+			}
+
+			em.remove(parentActivity);
+			em.persist(parentActivity);
+		}
+
 		em.getTransaction().commit();
 		em.close();
-		
-		if (localJID.equalsIgnoreCase(parentActivity.getActor().getUri()))
+
+		if (localJID.equalsIgnoreCase(parentActivity.getActor().getUri())) {
 			notify(localJID, commentEntry);
-		
+		}
 	}
-	
+
 	/**
 	 * Subscribe an entity to another entity activities.
-	 * 
+	 *
 	 * @param from the subscriber
 	 * @param to entity being subscribed to
 	 * @throws AlreadySubscribed
@@ -450,7 +465,7 @@ public class ActivityManager {
 
 	/**
 	 * Delete a subscription.
-	 * 
+	 *
 	 * @param from the entity requesting to unsubscribe
 	 * @param to the subscription target
 	 * @throws SubscriptionNotFound
@@ -465,7 +480,7 @@ public class ActivityManager {
 		query.setParameter(2, to);
 		List<Subscription> subscriptions = query.getResultList();
 		
-		// If it does not exist, we don't have anything left to do 
+		// If it does not exist, we don't have anything left to do
 		if (subscriptions == null || subscriptions.size()== 0) {
 			em.close();
 			return;
@@ -533,48 +548,51 @@ public class ActivityManager {
 		List<String> alreadySent = new ArrayList<String>();
 		
 		// Send to this user
-		if (entry.getParentId()==null){		
+		if (entry.getParentId()==null){
 			alreadySent.add(fromJID);
 			message.setTo(fromJID);
 			server.getMessageRouter().route(message);
 		}
-						
+		
 		// Send to all subscribers
 		for (Subscription activitySubscription : subscriptions) {
 			String recipientJID = activitySubscription.getSubscriber();
 			if (!canSee(fromJID, entry, recipientJID)) {
 				continue;
 			}
-		
-			alreadySent.add(recipientJID);						
+			
+			alreadySent.add(recipientJID);
 			message.setTo(recipientJID);
-			server.getMessageRouter().route(message);	
+			server.getMessageRouter().route(message);
 		}
 
 		// Send to recipients, if they can see it and have not already received it
 		if (entry.hasRecipients()) {
 			for (AtomReplyTo recipient : entry.getRecipients()) {
-				//TODO This is dirty, the recipient should be an IRI etc...
-				String recipientJID = recipient.getHref();  
-				if ((recipientJID==null) || (recipientJID.length()==0))
+				// TODO This is dirty, the recipient should be an IRI etc...
+				String recipientJID = recipient.getHref();
+				if (recipientJID == null || recipientJID.length() == 0) {
 					continue;
+				}
+				
 				if (!alreadySent.contains(recipientJID) && canSee(fromJID, entry, recipientJID)) {
 					alreadySent.add(fromJID);
 					
 					message.setTo(recipientJID);
-					server.getMessageRouter().route(message);												
+					server.getMessageRouter().route(message);
 				}
 			}
-		}			
+		}
 	}
 	
-	private void notifyComment(String fromJID, String toJID, ActivityEntry entry) throws UserNotFoundException {
+	private void notifyComment(String fromJID, String toJID, ActivityEntry entry)
+		throws UserNotFoundException {
 		
 		// TODO We may want to do some cleaning of activities before
 		// forwarding them (e.g. remove the acl, it is no one business)
 		final ActivityDomWriter writer = new DefaultActivityDomWriter();
 		final XMPPServer server = XMPPServer.getInstance();
-	
+		
 		final DOMDocument domDocument = new DOMDocument();
 
 		// Prepare the message
@@ -592,10 +610,9 @@ public class ActivityManager {
 		org.dom4j.Element itemElement = itemsElement.addElement("item");
 		itemElement.addAttribute("id", entry.getId());
 		itemElement.add((org.dom4j.Element) entryElement);
-
-
+		
 		message.setTo(toJID);
-		server.getMessageRouter().route(message);	
+		server.getMessageRouter().route(message);
 		
 	}
 	
@@ -605,7 +622,7 @@ public class ActivityManager {
 		
 		final XMPPServer server = XMPPServer.getInstance();
 		final List<Subscription> subscriptions = getSubscribers(fromJID);
-	
+		
 		// Prepare the message
 		
 		final Message message = new Message();
@@ -618,24 +635,22 @@ public class ActivityManager {
 		itemsElement.addAttribute("node", PEPActivityHandler.NODE);
 		org.dom4j.Element retractElement = itemsElement.addElement("retract");
 		retractElement.addAttribute("id", activityId);
-		
 
-		// Keep a list of people we sent it to avoid duplicates
+		// Keep a list of people we sent it to to avoid duplicates
 		List<String> alreadySent = new ArrayList<String>();
 		
 		// Send to this user
 		alreadySent.add(fromJID);
 		message.setTo(fromJID);
-		server.getMessageRouter().route(message);	
-						
+		server.getMessageRouter().route(message);
+		
 		// Send to all subscribers
 		for (Subscription activitySubscription : subscriptions) {
-			String recipientJID = activitySubscription.getSubscriber();			
-			alreadySent.add(recipientJID);						
+			String recipientJID = activitySubscription.getSubscriber();
+			alreadySent.add(recipientJID);
 			message.setTo(recipientJID);
-			server.getMessageRouter().route(message);	
-		}			
-		
+			server.getMessageRouter().route(message);
+		}
 	}
 	
 	private List<String> getGroups(String ownerJID, String userJID) {
@@ -653,7 +668,8 @@ public class ActivityManager {
 		return new ArrayList<String>();
 	}
 
-	private boolean canSee(String fromJID, ActivityEntry entry, String viewer) throws UserNotFoundException  {
+	private boolean canSee(String fromJID, ActivityEntry entry, String viewer)
+		throws UserNotFoundException  {
 		// Get a view action
 		final AclAction viewAction = aclFactory.aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT);
 		AclRule rule = null;
@@ -665,11 +681,11 @@ public class ActivityManager {
 		}
 
 		// If no view action was found, we consider it is denied
-		if (rule == null)
+		if (rule == null) {
 			return false;
+		}
 		
 		return AclManager.canSee(fromJID, rule, viewer);
-		
 	}
 
 	/**

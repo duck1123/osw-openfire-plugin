@@ -38,12 +38,9 @@ public class RepliesQueryHandler extends PEPCommandHandler {
 		super("OneSocialWeb - Query replies to an activity");
 	}
 	
-	
 	@SuppressWarnings( { "deprecation" })
 	@Override
 	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		
-	
 		final JID sender = packet.getFrom();
 		final JID recipient = packet.getTo();
 		
@@ -57,11 +54,11 @@ public class RepliesQueryHandler extends PEPCommandHandler {
 				result.setChildElement(packet.getChildElement().createCopy());
 				result.setError(PacketError.Condition.bad_request);
 				return result;
-			}			
+			}
 			
-			//Proccess the request here...
+			// Proccess the request here...
 			
-			// A valid submit request must contain at least one entry			
+			// A valid submit request must contain at least one entry
 			Element pubsubElement = packet.getChildElement();
 			Element itemsElement = pubsubElement.element("items");
 			List<Element> items = itemsElement.elements("item");
@@ -73,9 +70,9 @@ public class RepliesQueryHandler extends PEPCommandHandler {
 			}
 
 			// Parse the activity that we want the replies from:
-			ActivityDomReader reader = new PersistentActivityDomReader();			
+			ActivityDomReader reader = new PersistentActivityDomReader();
 			Element item = items.get(0);
-			String parentId= reader.readActivityId(new ElementAdapter(item));
+			String parentId = reader.readActivityId(new ElementAdapter(item));
 			
 			//The manager does the job...
 			List<ActivityEntry> replies = RepliesManager.getInstance().getReplies(parentId);
@@ -99,8 +96,6 @@ public class RepliesQueryHandler extends PEPCommandHandler {
 			
 			// Return and send the result packet
 			return result;
-			
-			
 		} catch (Exception e) {
 			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
 			IQ result = IQ.createResultIQ(packet);
@@ -108,14 +103,11 @@ public class RepliesQueryHandler extends PEPCommandHandler {
 			result.setError(PacketError.Condition.internal_server_error);
 			return result;
 		}
-		
-		
 	}
 	
 	@Override
 	public void initialize(XMPPServer server) {
 		super.initialize(server);
-		userManager = server.getUserManager();		
+		userManager = server.getUserManager();
 	}
-
 }
