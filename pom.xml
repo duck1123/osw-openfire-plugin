@@ -9,13 +9,6 @@
   <description>Adds onesocialweb protocol support to an openfire server</description>
   <url>http://onesocialweb.org/</url>
 
-  <repositories>
-    <repository>
-      <id>potsdam.de</id>
-      <url>http://fara.cs.uni-potsdam.de/~niess/repository</url>
-    </repository>
-  </repositories>
-
   <reporting>
     <plugins>
       <plugin>
@@ -74,11 +67,9 @@
               <goal>enhance</goal>
             </goals>
           </execution>
-        </executions> 
+        </executions>
       </plugin>
-
     </plugins>
-
   </build>
 
 
