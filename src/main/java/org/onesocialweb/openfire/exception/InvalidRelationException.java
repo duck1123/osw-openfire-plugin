@@ -19,7 +19,7 @@ package org.onesocialweb.openfire.exception;
 @SuppressWarnings("serial")
 public class InvalidRelationException extends Exception {
 
-	public InvalidRelationException(String message) {
-		super(message);
-	}
+    public InvalidRelationException(String message) {
+        super(message);
+    }
 }

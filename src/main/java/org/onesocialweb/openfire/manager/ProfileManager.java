@@ -42,120 +42,120 @@ import org.onesocialweb.openfire.model.vcard4.PersistentProfile;
  */
 public class ProfileManager {
 
-	/**
-	 * Singleton: keep a static reference to teh only instance
-	 */
-	private static ProfileManager instance;
-	
-	private final AclFactory aclFactory;
+    /**
+     * Singleton: keep a static reference to teh only instance
+     */
+    private static ProfileManager instance;
 
-	public static ProfileManager getInstance() {
-		if (instance == null) {
-			instance = new ProfileManager();
-		}
-		return instance;
-	}
+    private final AclFactory aclFactory;
 
-	/**
-	 * Retrieves the profile of the target entity has can be seen by the
-	 * requesting entity.
-	 *
-	 * TODO ACL is not yet implemented. All fields are returned at this stage.
-	 *
-	 * @param requestorJID
-	 *            the entity requesting the profile
-	 * @param targetJID
-	 *            the entity whose profile is requested
-	 * @return the profile of the target entity as can be seen by the requesting
-	 *         entity.
-	 * @throws UserNotFoundException
-	 */
-	public Profile getProfile(String requestorJID, String targetJID) throws UserNotFoundException {
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		PersistentProfile profile = em.find(PersistentProfile.class, targetJID);
-		em.close();
-		if (profile != null) {
-			if (requestorJID.equals(targetJID)) {
-				return profile;
-			} else {
-				// We should filter all fields that the requestor is not
-				// supposed to see and strip all data related to ACLs.
-				
-				final AclAction viewAction = aclFactory.aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT);
-				List<Field> fields =profile.getFields();
-				List<Field> canSeefields= new ArrayList<Field>();
-				for (Field field: fields)
-				{
-					boolean canSee=false;
-					List<AclRule> rules= field.getAclRules();
-					//this is a patch, so that the profile and its fields can be retrieved even when the acl rules where not set...
-					// currently the vodafonernd.com DB has many profiles without any ACL rules, which retrieves empty profiles...
-					if (rules.isEmpty())
-						canSee=true;
-					for (AclRule rule: rules)
-					{
-						if ((rule.hasAction(viewAction)) &&
-							(AclManager.canSee(targetJID, rule, requestorJID))) {
-							canSee=true;
-						}
-					}
-					if (canSee) {
-						canSeefields.add(field);
-					}
-				}
-				
-				profile.removeAll();
-				try {
-					for (Field f : canSeefields) {
-						f.setAclRules(new ArrayList<AclRule>());
-						profile.addField(f);
-					}
-				} catch (CardinalityException ce) {
-				} catch (UnsupportedFieldException ufe){
-				}
-				return profile;
-			}
-		} else {
-			return null;
-		}
-	}
+    public static ProfileManager getInstance() {
+        if (instance == null) {
+            instance = new ProfileManager();
+        }
+        return instance;
+    }
 
-	/**
-	 * Create or update the profile of a user.
-	 *
-	 * If the user already has a profile defined, that profile will first be deleted and
-	 * replaced by the new profile.
-	 *
-	 * @param userJID the user whose profile is to be changed
-	 * @param profile the new profile
-	 * @throws UserNotFoundException
-	 */
-	public void publishProfile(String userJID, Profile profile) throws UserNotFoundException {
-		// open a transaction since we want delete and update to be atomical
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
+    /**
+     * Retrieves the profile of the target entity has can be seen by the
+     * requesting entity.
+     *
+     * TODO ACL is not yet implemented. All fields are returned at this stage.
+     *
+     * @param requestorJID
+     *            the entity requesting the profile
+     * @param targetJID
+     *            the entity whose profile is requested
+     * @return the profile of the target entity as can be seen by the requesting
+     *         entity.
+     * @throws UserNotFoundException
+     */
+    public Profile getProfile(String requestorJID, String targetJID) throws UserNotFoundException {
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        PersistentProfile profile = em.find(PersistentProfile.class, targetJID);
+        em.close();
+        if (profile != null) {
+            if (requestorJID.equals(targetJID)) {
+                return profile;
+            } else {
+                // We should filter all fields that the requestor is not
+                // supposed to see and strip all data related to ACLs.
 
-		// Overide the user to avoid spoofing
-		profile.setUserId(userJID);
+                final AclAction viewAction = aclFactory.aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT);
+                List<Field> fields =profile.getFields();
+                List<Field> canSeefields= new ArrayList<Field>();
+                for (Field field: fields)
+                {
+                    boolean canSee=false;
+                    List<AclRule> rules= field.getAclRules();
+                    //this is a patch, so that the profile and its fields can be retrieved even when the acl rules where not set...
+                    // currently the vodafonernd.com DB has many profiles without any ACL rules, which retrieves empty profiles...
+                    if (rules.isEmpty())
+                        canSee=true;
+                    for (AclRule rule: rules)
+                    {
+                        if ((rule.hasAction(viewAction)) &&
+                            (AclManager.canSee(targetJID, rule, requestorJID))) {
+                            canSee=true;
+                        }
+                    }
+                    if (canSee) {
+                        canSeefields.add(field);
+                    }
+                }
 
-		// Remove an old profile
-		PersistentProfile oldProfile = em.find(PersistentProfile.class, userJID);
-		if (oldProfile != null) {
-			em.remove(oldProfile);
-		}
+                profile.removeAll();
+                try {
+                    for (Field f : canSeefields) {
+                        f.setAclRules(new ArrayList<AclRule>());
+                        profile.addField(f);
+                    }
+                } catch (CardinalityException ce) {
+                } catch (UnsupportedFieldException ufe){
+                }
+                return profile;
+            }
+        } else {
+            return null;
+        }
+    }
 
-		// Persist the profile
-		em.persist(profile);
+    /**
+     * Create or update the profile of a user.
+     *
+     * If the user already has a profile defined, that profile will first be deleted and
+     * replaced by the new profile.
+     *
+     * @param userJID the user whose profile is to be changed
+     * @param profile the new profile
+     * @throws UserNotFoundException
+     */
+    public void publishProfile(String userJID, Profile profile) throws UserNotFoundException {
+        // open a transaction since we want delete and update to be atomical
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
 
-		// Safe to commit here
-		em.getTransaction().commit();
-		em.close();
-	}
-	
-	/**
-	 * Private constructor to enforce the singleton
-	 */
-	private ProfileManager() {
-		aclFactory = new PersistentAclFactory();
-	}
+        // Overide the user to avoid spoofing
+        profile.setUserId(userJID);
+
+        // Remove an old profile
+        PersistentProfile oldProfile = em.find(PersistentProfile.class, userJID);
+        if (oldProfile != null) {
+            em.remove(oldProfile);
+        }
+
+        // Persist the profile
+        em.persist(profile);
+
+        // Safe to commit here
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    /**
+     * Private constructor to enforce the singleton
+     */
+    private ProfileManager() {
+        aclFactory = new PersistentAclFactory();
+    }
 }

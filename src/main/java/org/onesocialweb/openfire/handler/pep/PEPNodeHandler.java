@@ -21,7 +21,7 @@ import org.jivesoftware.openfire.container.BasicModule;
 import org.xmpp.packet.IQ;
 
 public abstract class PEPNodeHandler extends BasicModule {
-	
+
     /**
      * Create a basic module with the given name.
      *
@@ -30,8 +30,8 @@ public abstract class PEPNodeHandler extends BasicModule {
     public PEPNodeHandler(String moduleName) {
         super(moduleName);
     }
-	
+
     public abstract IQ handleIQ(IQ packet) throws UnauthorizedException;
-    
-	public abstract String getNode();
+
+    public abstract String getNode();
 }

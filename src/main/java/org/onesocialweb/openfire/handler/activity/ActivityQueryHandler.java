@@ -38,80 +38,84 @@ import org.xmpp.packet.PacketError;
 
 public class ActivityQueryHandler extends PEPCommandHandler {
 
-	public static final String COMMAND = "items";
-	
-	private UserManager userManager;
+    public static final String COMMAND = "items";
 
-	public ActivityQueryHandler() {
-		super("OneSocialWeb - Query a user activities");
-	}
+    private UserManager userManager;
 
-	@Override
-	public String getCommand() {
-		return COMMAND;
-	}
-	
-	@SuppressWarnings( { "deprecation" })
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		
-		JID sender = packet.getFrom();
-		JID target = packet.getTo();
-		
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
-			// If no recipient, then the target is the sender
-			if (target == null || target.getNode() == null) {
-				target = packet.getFrom();
-			}
-			
-			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) &&
-				target != null &&
-				target.getNode() != null &&
-				userManager.isRegisteredUser(target.getNode()))) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// We fetch the activities of the target user
-			List<ActivityEntry> activities = ActivityManager.getInstance().getActivities(sender.toBareJID(), target.toBareJID());
-			
-			// Prepare the result packet
-			ActivityDomWriter writer = new DefaultActivityDomWriter();
-			DOMDocument domDocument = new DOMDocument();
-			IQ result = IQ.createResultIQ(packet);
-			org.dom4j.Element pubsubElement = result.setChildElement("pubsub", "http://jabber.org/protocol/pubsub");
-			org.dom4j.Element itemsElement = pubsubElement.addElement("items");
-			itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+    public ActivityQueryHandler() {
+        super("OneSocialWeb - Query a user activities");
+    }
 
-			for (ActivityEntry entry : activities) {
-				Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
-				writer.write(entry, entryElement);
-				domDocument.removeChild(entryElement);
-				org.dom4j.Element itemElement = itemsElement.addElement("item");
-				itemElement.addAttribute("id", entry.getId());
-				itemElement.add((org.dom4j.Element) entryElement);
-			}
-			
-			// Return and send the result packet
-			return result;
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+    @Override
+    public String getCommand() {
+        return COMMAND;
+    }
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-	}
+    @SuppressWarnings( { "deprecation" })
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+
+        JID sender = packet.getFrom();
+        JID target = packet.getTo();
+
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
+            // If no recipient, then the target is the sender
+            if (target == null || target.getNode() == null) {
+                target = packet.getFrom();
+            }
+
+            // A valid request is an IQ of type get, for a valid and local recipient
+            if (!(packet.getType().equals(IQ.Type.get) &&
+                target != null &&
+                target.getNode() != null &&
+                userManager.isRegisteredUser(target.getNode()))) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // We fetch the activities of the target user
+            List<ActivityEntry> activities =
+                ActivityManager.getInstance().getActivities(sender.toBareJID(),
+                                                            target.toBareJID());
+
+            // Prepare the result packet
+            ActivityDomWriter writer = new DefaultActivityDomWriter();
+            DOMDocument domDocument = new DOMDocument();
+            IQ result = IQ.createResultIQ(packet);
+            org.dom4j.Element pubsubElement =
+                result.setChildElement("pubsub",
+                                       "http://jabber.org/protocol/pubsub");
+            org.dom4j.Element itemsElement = pubsubElement.addElement("items");
+            itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+
+            for (ActivityEntry entry : activities) {
+                Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
+                writer.write(entry, entryElement);
+                domDocument.removeChild(entryElement);
+                org.dom4j.Element itemElement = itemsElement.addElement("item");
+                itemElement.addAttribute("id", entry.getId());
+                itemElement.add((org.dom4j.Element) entryElement);
+            }
+
+            // Return and send the result packet
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+    }
 }

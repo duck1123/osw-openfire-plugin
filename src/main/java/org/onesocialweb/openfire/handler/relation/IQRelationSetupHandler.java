@@ -40,96 +40,95 @@ import org.xmpp.packet.PacketError;
 
 public class IQRelationSetupHandler extends IQHandler {
 
-	public static final String NAME = "setup";
-	
-	public static final String NAMESPACE = "http://onesocialweb.org/spec/1.0/relations#setup";
-	
-	private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
+    public static final String NAME = "setup";
 
-	private UserManager userManager;
-	
-	private RelationManager relationManager;
-	
-	public IQRelationSetupHandler() {
-		super("OneSocialWeb - Setup relations handler");
-	}
+    public static final String NAMESPACE = "http://onesocialweb.org/spec/1.0/relations#setup";
 
-	@Override
-	public IQHandlerInfo getInfo() {
-		return info;
-	}
+    private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
 
-	@SuppressWarnings( { "deprecation", "unchecked" })
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		final JID sender = packet.getFrom();
-		final JID recipient = packet.getTo();
+    private UserManager userManager;
 
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
-			// A valid request is an IQ of type set,
-			if (!packet.getType().equals(IQ.Type.set)) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// If a recipient is specified, it must be equal to the sender
-			// bareJID
-			if (recipient != null && !recipient.toString().equals(sender.toBareJID())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
-			
-			// Only a local user can publish an activity to his stream
-			if (!userManager.isRegisteredUser(sender.getNode())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
+    private RelationManager relationManager;
 
-			// A valid submit requets must contain one relation item
-			Element request = packet.getChildElement();
-			Iterator<Element> i_entry = request.elementIterator(QName.get(Onesocialweb.RELATION_ELEMENT, Namespace.get(Onesocialweb.NAMESPACE)));
-			if (!i_entry.hasNext()) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
+    public IQRelationSetupHandler() {
+        super("OneSocialWeb - Setup relations handler");
+    }
 
-			// Parse the relation
-			RelationDomReader reader = new PersistentRelationDomReader();
-			Element e_entry = i_entry.next();
-			PersistentRelation relation = (PersistentRelation) reader.readElement(new ElementAdapter(e_entry));
-			Log.debug("IQRelationSetup received request: " + relation);
-			
-			// Setup the relation (this will also trigger the notification to the user)
-			relationManager.setupRelation(sender.toBareJID(), relation);
+    @Override
+    public IQHandlerInfo getInfo() {
+        return info;
+    }
 
-			// Send a success result
-			IQ result = IQ.createResultIQ(packet);
-			return result;
+    @SuppressWarnings( { "deprecation", "unchecked" })
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        final JID sender = packet.getFrom();
+        final JID recipient = packet.getTo();
 
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
+            // A valid request is an IQ of type set,
+            if (!packet.getType().equals(IQ.Type.set)) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-		relationManager = RelationManager.getInstance();
-	}
+            // If a recipient is specified, it must be equal to the sender
+            // bareJID
+            if (recipient != null && !recipient.toString().equals(sender.toBareJID())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
+
+            // Only a local user can publish an activity to his stream
+            if (!userManager.isRegisteredUser(sender.getNode())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
+
+            // A valid submit requets must contain one relation item
+            Element request = packet.getChildElement();
+            Iterator<Element> i_entry = request.elementIterator(QName.get(Onesocialweb.RELATION_ELEMENT, Namespace.get(Onesocialweb.NAMESPACE)));
+            if (!i_entry.hasNext()) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // Parse the relation
+            RelationDomReader reader = new PersistentRelationDomReader();
+            Element e_entry = i_entry.next();
+            PersistentRelation relation = (PersistentRelation) reader.readElement(new ElementAdapter(e_entry));
+            Log.debug("IQRelationSetup received request: " + relation);
+
+            // Setup the relation (this will also trigger the notification to the user)
+            relationManager.setupRelation(sender.toBareJID(), relation);
+
+            // Send a success result
+            IQ result = IQ.createResultIQ(packet);
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+        relationManager = RelationManager.getInstance();
+    }
 }

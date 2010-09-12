@@ -18,5 +18,4 @@ package org.onesocialweb.openfire.exception;
 
 @SuppressWarnings("serial")
 public class AuthenticationException extends Exception {
-
 }

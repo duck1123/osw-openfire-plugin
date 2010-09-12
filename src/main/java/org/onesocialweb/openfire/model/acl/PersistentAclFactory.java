@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.acl;
 
@@ -23,19 +23,18 @@ import org.onesocialweb.model.acl.AclSubject;
 
 public class PersistentAclFactory extends AclFactory {
 
-	@Override
-	public AclAction aclAction() {
-		return new PersistentAclAction();
-	}
+    @Override
+    public AclAction aclAction() {
+        return new PersistentAclAction();
+    }
 
-	@Override
-	public AclRule aclRule() {
-		return new PersistentAclRule();
-	}
+    @Override
+    public AclRule aclRule() {
+        return new PersistentAclRule();
+    }
 
-	@Override
-	public AclSubject aclSubject() {
-		return new PersistentAclSubject();
-	}
-
+    @Override
+    public AclSubject aclSubject() {
+        return new PersistentAclSubject();
+    }
 }

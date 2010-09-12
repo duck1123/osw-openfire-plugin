@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.atom;
 
@@ -24,151 +24,150 @@ import org.onesocialweb.model.atom.AtomLink;
 @Entity(name="AtomLink")
 public class PersistentAtomLink extends PersistentAtomCommon implements AtomLink {
 
-	@Basic
-	private String href;
+    @Basic
+    private String href;
 
-	@Basic
-	private String hrefLang;
+    @Basic
+    private String hrefLang;
 
-	@Basic
-	private String rel;
+    @Basic
+    private String rel;
 
-	@Basic
-	private String title;
+    @Basic
+    private String title;
 
-	@Basic
-	private String type;
+    @Basic
+    private String type;
 
-	@Basic
-	private String length;
-	
-	@Basic
-	private int count;
+    @Basic
+    private String length;
 
-	@Override
-	public int getCount() {
-		return count;
-	}
+    @Basic
+    private int count;
 
-	@Override
-	public void setCount(int count) {
-		this.count = count;
-	}
+    @Override
+    public int getCount() {
+        return count;
+    }
 
-	@Override
-	public String getHref() {
-		return href;
-	}
+    @Override
+    public void setCount(int count) {
+        this.count = count;
+    }
 
-	@Override
-	public String getHreflang() {
-		return hrefLang;
-	}
+    @Override
+    public String getHref() {
+        return href;
+    }
 
-	@Override
-	public String getLength() {
-		return length;
-	}
+    @Override
+    public String getHreflang() {
+        return hrefLang;
+    }
 
-	@Override
-	public String getRel() {
-		return rel;
-	}
+    @Override
+    public String getLength() {
+        return length;
+    }
 
-	@Override
-	public String getTitle() {
-		return title;
-	}
+    @Override
+    public String getRel() {
+        return rel;
+    }
 
-	@Override
-	public String getType() {
-		return type;
-	}
+    @Override
+    public String getTitle() {
+        return title;
+    }
 
-	@Override
-	public void setHref(final String href) {
-		this.href = href;
-	}
+    @Override
+    public String getType() {
+        return type;
+    }
 
-	@Override
-	public void setHreflang(final String hreflang) {
-		this.hrefLang = hreflang;
-	}
+    @Override
+    public void setHref(final String href) {
+        this.href = href;
+    }
 
-	@Override
-	public void setLength(final String length) {
-		this.length = length;
-	}
+    @Override
+    public void setHreflang(final String hreflang) {
+        this.hrefLang = hreflang;
+    }
 
-	@Override
-	public void setRel(final String rel) {
-		this.rel = rel;
-	}
+    @Override
+    public void setLength(final String length) {
+        this.length = length;
+    }
 
-	@Override
-	public void setTitle(final String title) {
-		this.title = title;
-	}
+    @Override
+    public void setRel(final String rel) {
+        this.rel = rel;
+    }
 
-	@Override
-	public void setType(final String type) {
-		this.type = type;
-	}
+    @Override
+    public void setTitle(final String title) {
+        this.title = title;
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("[AtomLink ");
-		if (href != null) {
-			buffer.append("href:" + href + " ");
-		}
-		if (hrefLang != null) {
-			buffer.append("hrefLang:" + hrefLang + " ");
-		}
-		if (length != null) {
-			buffer.append("length:" + length + " ");
-		}
-		if (rel != null) {
-			buffer.append("rel:" + rel + " ");
-		}
-		if (title != null) {
-			buffer.append("title:" + title + " ");
-		}
-		if (type != null) {
-			buffer.append("type:" + type + " ");
-		}
-		buffer.append("]");
-		return buffer.toString();
-	}
+    @Override
+    public void setType(final String type) {
+        this.type = type;
+    }
 
-	@Override
-	public boolean hasHref() {
-		return href != null;
-	}
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[AtomLink ");
+        if (href != null) {
+            buffer.append("href:" + href + " ");
+        }
+        if (hrefLang != null) {
+            buffer.append("hrefLang:" + hrefLang + " ");
+        }
+        if (length != null) {
+            buffer.append("length:" + length + " ");
+        }
+        if (rel != null) {
+            buffer.append("rel:" + rel + " ");
+        }
+        if (title != null) {
+            buffer.append("title:" + title + " ");
+        }
+        if (type != null) {
+            buffer.append("type:" + type + " ");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
 
-	@Override
-	public boolean hasHreflang() {
-		return hrefLang != null;
-	}
+    @Override
+    public boolean hasHref() {
+        return href != null;
+    }
 
-	@Override
-	public boolean hasLength() {
-		return length != null;
-	}
+    @Override
+    public boolean hasHreflang() {
+        return hrefLang != null;
+    }
 
-	@Override
-	public boolean hasRel() {
-		return rel != null;
-	}
+    @Override
+    public boolean hasLength() {
+        return length != null;
+    }
 
-	@Override
-	public boolean hasTitle() {
-		return title != null;
-	}
+    @Override
+    public boolean hasRel() {
+        return rel != null;
+    }
 
-	@Override
-	public boolean hasType() {
-		return type != null;
-	}
+    @Override
+    public boolean hasTitle() {
+        return title != null;
+    }
 
+    @Override
+    public boolean hasType() {
+        return type != null;
+    }
 }

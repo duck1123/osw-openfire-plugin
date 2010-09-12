@@ -10,45 +10,41 @@ import org.onesocialweb.model.acl.AclRule;
 import org.onesocialweb.model.acl.AclSubject;
 import org.xmpp.packet.JID;
 
-public class AclManager 
+public class AclManager
 {
 
-	public static boolean canSee(String owner, AclRule rule, String viewer) throws UserNotFoundException {
-		
-		// Get the subjects, if none then access denied
-		final List<AclSubject> subjects = rule.getSubjects();
-		if (subjects == null)
-			return false;
+    public static boolean canSee(String owner, AclRule rule, String viewer) throws UserNotFoundException {
 
-		Roster roster =XMPPServer.getInstance().getRosterManager().getRoster(new JID(owner).getNode());
-		// Get the roster entry that match the viewer, this is only
-		// used for the groups based matches
-		RosterItem rosterItem = null;
-		try {
-			rosterItem = roster.getRosterItem(new JID(viewer));
-		} catch (UserNotFoundException e) {
-		}
+        // Get the subjects, if none then access denied
+        final List<AclSubject> subjects = rule.getSubjects();
+        if (subjects == null)
+            return false;
 
-		// Iterate through the subjects and hope for the best
-		for (AclSubject aclSubject : subjects) {
-			if (aclSubject.getType().equals(AclSubject.EVERYONE)) {
-				return true;
-			} else if (aclSubject.getType().equals(AclSubject.GROUP)) {
-				if (rosterItem != null && rosterItem.getGroups().contains(aclSubject.getName())) {
-					return true;
-				}
-			} else if (aclSubject.getType().equals(AclSubject.PERSON)) {
-				if (viewer.equals(aclSubject.getName())) {
-					return true;
-				}
-			}
-		}
+        Roster roster =XMPPServer.getInstance().getRosterManager().getRoster(new JID(owner).getNode());
+        // Get the roster entry that match the viewer, this is only
+        // used for the groups based matches
+        RosterItem rosterItem = null;
+        try {
+            rosterItem = roster.getRosterItem(new JID(viewer));
+        } catch (UserNotFoundException e) {
+        }
 
-		// Still here ? Then we did not find a match and it is a deny
-		return false;
-		
-		
-	}
-	
-	
+        // Iterate through the subjects and hope for the best
+        for (AclSubject aclSubject : subjects) {
+            if (aclSubject.getType().equals(AclSubject.EVERYONE)) {
+                return true;
+            } else if (aclSubject.getType().equals(AclSubject.GROUP)) {
+                if (rosterItem != null && rosterItem.getGroups().contains(aclSubject.getName())) {
+                    return true;
+                }
+            } else if (aclSubject.getType().equals(AclSubject.PERSON)) {
+                if (viewer.equals(aclSubject.getName())) {
+                    return true;
+                }
+            }
+        }
+
+        // Still here ? Then we did not find a match and it is a deny
+        return false;
+    }
 }

@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model;
 
@@ -22,20 +22,19 @@ import org.onesocialweb.model.activity.ActivityEntry;
 
 public interface ActivityMessage {
 
-	public String getSender();
-	
-	public void setSender(String fromJID);
-	
-	public String getRecipient();
+    public String getSender();
 
-	public void setRecipient(String toJID);
+    public void setSender(String fromJID);
 
-	public Date getReceived();
+    public String getRecipient();
 
-	public void setReceived(Date received);
+    public void setRecipient(String toJID);
 
-	public ActivityEntry getActivity();
+    public Date getReceived();
 
-	public void setActivity(ActivityEntry activity);
+    public void setReceived(Date received);
 
+    public ActivityEntry getActivity();
+
+    public void setActivity(ActivityEntry activity);
 }

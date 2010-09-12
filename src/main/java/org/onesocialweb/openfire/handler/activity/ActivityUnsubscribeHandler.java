@@ -32,72 +32,71 @@ import org.xmpp.packet.PacketError;
 
 public class ActivityUnsubscribeHandler extends PEPCommandHandler {
 
-	public static final String COMMAND = "unsubscribe";
-	
-	private UserManager userManager;
+    public static final String COMMAND = "unsubscribe";
 
-	public ActivityUnsubscribeHandler() {
-		super("OneSocialWeb - Unsubscribe to a user activities");
-	}
+    private UserManager userManager;
 
-	@Override
-	public String getCommand() {
-		return COMMAND;
-	}
+    public ActivityUnsubscribeHandler() {
+        super("OneSocialWeb - Unsubscribe to a user activities");
+    }
 
-	@SuppressWarnings( { "deprecation" })
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
+    @Override
+    public String getCommand() {
+        return COMMAND;
+    }
 
-		JID sender = packet.getFrom();
-		JID recipient = packet.getTo();
-		
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
-			
-			// A valid request is an IQ of type set, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.set) &&
-				recipient != null &&
-				recipient.getNode() != null &&
-				userManager.isRegisteredUser(recipient.getNode()))) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// A valid request has a (bare) JID attribute
-			Element pubsubElement = packet.getChildElement();
-			Element subscribeElement = pubsubElement.element("unsubscribe");
-			Attribute jidAttribute = subscribeElement.attribute("jid");
-			if (jidAttribute == null || !sender.toBareJID().equals(jidAttribute.getValue())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// Add the relation to the database
-			ActivityManager.getInstance().unsubscribe(sender.toBareJID(), recipient.toBareJID());
-			
-			// Return and send a result packet
-			IQ result = IQ.createResultIQ(packet);
-			return result;
-			
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+    @SuppressWarnings( { "deprecation" })
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-	}
+        JID sender = packet.getFrom();
+        JID recipient = packet.getTo();
+
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
+
+            // A valid request is an IQ of type set, for a valid and local recipient
+            if (!(packet.getType().equals(IQ.Type.set) &&
+                recipient != null &&
+                recipient.getNode() != null &&
+                userManager.isRegisteredUser(recipient.getNode()))) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // A valid request has a (bare) JID attribute
+            Element pubsubElement = packet.getChildElement();
+            Element subscribeElement = pubsubElement.element("unsubscribe");
+            Attribute jidAttribute = subscribeElement.attribute("jid");
+            if (jidAttribute == null || !sender.toBareJID().equals(jidAttribute.getValue())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // Add the relation to the database
+            ActivityManager.getInstance().unsubscribe(sender.toBareJID(), recipient.toBareJID());
+
+            // Return and send a result packet
+            IQ result = IQ.createResultIQ(packet);
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+    }
 }

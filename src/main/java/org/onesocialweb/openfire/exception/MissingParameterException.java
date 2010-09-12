@@ -19,13 +19,13 @@ package org.onesocialweb.openfire.exception;
 @SuppressWarnings("serial")
 public class MissingParameterException extends Exception {
 
-	private final String parameter;
-	
-	public MissingParameterException(String parameter) {
-		this.parameter = parameter;
-	}
-	
-	public String getParameter() {
-		return parameter;
-	}
+    private final String parameter;
+
+    public MissingParameterException(String parameter) {
+        this.parameter = parameter;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
 }

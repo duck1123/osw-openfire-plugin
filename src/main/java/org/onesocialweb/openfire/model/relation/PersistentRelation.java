@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.relation;
 import java.util.ArrayList;
@@ -35,222 +35,221 @@ import org.onesocialweb.openfire.model.acl.PersistentAclRule;
 @Embeddable
 @Entity(name="Relation")
 public class PersistentRelation implements Relation {
-	
-	@Basic
-	private String guid;
 
-	@Basic
-	private String comment;
-	
-	@Basic
-	private String origin;
-	
-	@Basic
-	private String message;
-	
-	@Basic
-	private String nature;
-	
-	@Basic
-	private String owner;
-	
-	@Basic
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date published;
-	
-	@Basic
-	private String status;
-	
-	@Basic
-	private String target;
-	
-	@OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
-	private List<AclRule> aclRules = new ArrayList<AclRule>();
-	
-	@Override
-	public void addAclRule(AclRule rule) {
-		this.aclRules.add(rule);
-	}
+    @Basic
+    private String guid;
 
-	@Override
-	public List<AclRule> getAclRules() {
-		return aclRules;
-	}
+    @Basic
+    private String comment;
 
-	@Override
-	public String getComment() {
-		return comment;
-	}
+    @Basic
+    private String origin;
 
-	@Override
-	public String getFrom() {
-		return origin;
-	}
+    @Basic
+    private String message;
 
-	@Override
-	public String getId() {
-		return guid;
-	}
+    @Basic
+    private String nature;
 
-	@Override
-	public String getMessage() {
-		return message;
-	}
+    @Basic
+    private String owner;
 
-	@Override
-	public String getNature() {
-		return nature;
-	}
+    @Basic
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date published;
 
-	public String getOwner() {
-		return owner;
-	}
-	
-	@Override
-	public Date getPublished() {
-		return published;
-	}
+    @Basic
+    private String status;
 
-	@Override
-	public String getStatus() {
-		return status;
-	}
+    @Basic
+    private String target;
 
-	@Override
-	public String getTo() {
-		return target;
-	}
+    @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
+    private List<AclRule> aclRules = new ArrayList<AclRule>();
 
-	@Override
-	public boolean hasAclRules() {
-		return (aclRules != null && !aclRules.isEmpty());
-	}
+    @Override
+    public void addAclRule(AclRule rule) {
+        this.aclRules.add(rule);
+    }
 
-	@Override
-	public boolean hasComment() {
-		return (comment != null);
-	}
+    @Override
+    public List<AclRule> getAclRules() {
+        return aclRules;
+    }
 
-	@Override
-	public boolean hasFrom() {
-		return (origin != null);
-	}
+    @Override
+    public String getComment() {
+        return comment;
+    }
 
-	@Override
-	public boolean hasId() {
-		return (guid != null);
-	}
+    @Override
+    public String getFrom() {
+        return origin;
+    }
 
-	@Override
-	public boolean hasMessage() {
-		return (message != null);
-	}
+    @Override
+    public String getId() {
+        return guid;
+    }
 
-	@Override
-	public boolean hasNature() {
-		return (nature != null);
-	}
-	
-	public boolean hasOwner() {
-		return (owner != null);
-	}
+    @Override
+    public String getMessage() {
+        return message;
+    }
 
-	@Override
-	public boolean hasPublished() {
-		return (published != null);
-	}
+    @Override
+    public String getNature() {
+        return nature;
+    }
 
-	@Override
-	public boolean hasStatus() {
-		return (status != null);
-	}
+    public String getOwner() {
+        return owner;
+    }
 
-	@Override
-	public boolean hasTo() {
-		return (target != null);
-	}
-	
-	@Override
-	public void removeAclRule(AclRule rule) {
-		this.aclRules.remove(rule);
-	}
+    @Override
+    public Date getPublished() {
+        return published;
+    }
 
-	@Override
-	public void setAclRules(List<AclRule> rules) {
-		this.aclRules = rules;
-	}
+    @Override
+    public String getStatus() {
+        return status;
+    }
 
-	@Override
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    @Override
+    public String getTo() {
+        return target;
+    }
 
-	@Override
-	public void setFrom(String from) {
-		this.origin = from;
-	}
+    @Override
+    public boolean hasAclRules() {
+        return (aclRules != null && !aclRules.isEmpty());
+    }
 
-	@Override
-	public void setId(String id) {
-		this.guid = id;
-	}
+    @Override
+    public boolean hasComment() {
+        return (comment != null);
+    }
 
-	@Override
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    @Override
+    public boolean hasFrom() {
+        return (origin != null);
+    }
 
-	@Override
-	public void setNature(String nature) {
-		this.nature = nature;
-	}
-	
-	public void setOwner(String owner) {
-		this.owner = owner;
-	}
+    @Override
+    public boolean hasId() {
+        return (guid != null);
+    }
 
-	@Override
-	public void setPublished(Date published) {
-		this.published = published;
-	}
+    @Override
+    public boolean hasMessage() {
+        return (message != null);
+    }
 
-	@Override
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    @Override
+    public boolean hasNature() {
+        return (nature != null);
+    }
 
-	@Override
-	public void setTo(String to) {
-		this.target = to;
-	}
+    public boolean hasOwner() {
+        return (owner != null);
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("[Relation ");
-		if (guid != null) {
-			buffer.append("id:" + guid + " ");
-		}
-		if (origin != null) {
-			buffer.append("from:" + origin + " ");
-		}
-		if (target != null) {
-			buffer.append("to:" + target + " ");
-		}
-		if (nature != null) {
-			buffer.append("nature:" + nature + " ");
-		}
-		if (status != null) {
-			buffer.append("status:" + status + " ");
-		}
-		if (message != null) {
-			buffer.append("message:" + message + " ");
-		}
-		if (comment != null) {
-			buffer.append("comment:" + comment + " ");
-		}
-		buffer.append("]");
-		return buffer.toString();
-	}
+    @Override
+    public boolean hasPublished() {
+        return (published != null);
+    }
 
+    @Override
+    public boolean hasStatus() {
+        return (status != null);
+    }
+
+    @Override
+    public boolean hasTo() {
+        return (target != null);
+    }
+
+    @Override
+    public void removeAclRule(AclRule rule) {
+        this.aclRules.remove(rule);
+    }
+
+    @Override
+    public void setAclRules(List<AclRule> rules) {
+        this.aclRules = rules;
+    }
+
+    @Override
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    @Override
+    public void setFrom(String from) {
+        this.origin = from;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.guid = id;
+    }
+
+    @Override
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public void setNature(String nature) {
+        this.nature = nature;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    public void setPublished(Date published) {
+        this.published = published;
+    }
+
+    @Override
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Override
+    public void setTo(String to) {
+        this.target = to;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[Relation ");
+        if (guid != null) {
+            buffer.append("id:" + guid + " ");
+        }
+        if (origin != null) {
+            buffer.append("from:" + origin + " ");
+        }
+        if (target != null) {
+            buffer.append("to:" + target + " ");
+        }
+        if (nature != null) {
+            buffer.append("nature:" + nature + " ");
+        }
+        if (status != null) {
+            buffer.append("status:" + status + " ");
+        }
+        if (message != null) {
+            buffer.append("message:" + message + " ");
+        }
+        if (comment != null) {
+            buffer.append("comment:" + comment + " ");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
 }

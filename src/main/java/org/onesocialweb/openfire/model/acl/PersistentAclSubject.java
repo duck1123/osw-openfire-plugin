@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.acl;
 
@@ -24,63 +24,63 @@ import org.onesocialweb.model.acl.AclSubject;
 @Entity(name="AclSubject")
 public class PersistentAclSubject implements AclSubject {
 
-	@Basic
-	private String name;
-	
-	@Basic
-	private String type;
-	
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Basic
+    private String name;
 
-	@Override
-	public String getType() {
-		return type;
-	}
+    @Basic
+    private String type;
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setType(String type) {
-		this.type = type;
-	}
+    @Override
+    public String getType() {
+        return type;
+    }
 
-	@Override
-	public boolean hasName() {
-		return (name != null && !name.isEmpty());
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public boolean hasType() {
-		return (type != null && !type.isEmpty());
-	}
+    @Override
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof AclSubject) {
-			AclSubject other = (AclSubject) obj;
-			return other.getName().equals(name) && other.getType().equals(type);
-		} else {
-			return false;
-		}		
-	}
-	
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("[AclSubject ");
-		if (name != null) {
-			buffer.append("name:" + name + " ");
-		}
-		if (type != null) {
-			buffer.append("type:" + type + " ");
-		}
-		buffer.append("]");
-		return buffer.toString();
-	}
+    @Override
+    public boolean hasName() {
+        return (name != null && !name.isEmpty());
+    }
+
+    @Override
+    public boolean hasType() {
+        return (type != null && !type.isEmpty());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AclSubject) {
+            AclSubject other = (AclSubject) obj;
+            return other.getName().equals(name) && other.getType().equals(type);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[AclSubject ");
+        if (name != null) {
+            buffer.append("name:" + name + " ");
+        }
+        if (type != null) {
+            buffer.append("type:" + type + " ");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
 }

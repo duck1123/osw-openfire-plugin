@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model;
 
@@ -20,16 +20,15 @@ import java.util.Date;
 
 public interface Subscription {
 
-	public Date getCreated();
+    public Date getCreated();
 
-	public void setCreated(Date created);
+    public void setCreated(Date created);
 
-	public String getSubscriber();
+    public String getSubscriber();
 
-	public void setSubscriber(String subscriber);
+    public void setSubscriber(String subscriber);
 
-	public String getTarget();
+    public String getTarget();
 
-	public void setTarget(String target);
-
+    public void setTarget(String target);
 }

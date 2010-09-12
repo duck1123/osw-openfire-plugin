@@ -30,55 +30,55 @@ import org.xmpp.packet.Packet;
 
 public class IQSubscribeInterceptor implements PacketInterceptor {
 
-	private final XMPPServer server;
+    private final XMPPServer server;
 
-	public IQSubscribeInterceptor() {
-		server = XMPPServer.getInstance();
-	}
+    public IQSubscribeInterceptor() {
+        server = XMPPServer.getInstance();
+    }
 
-	public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed)
-		throws PacketRejectedException {
+    public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed)
+        throws PacketRejectedException {
 
-		// We only care for incoming IQ that have not yet been processed
-		if (incoming && !processed && packet instanceof IQ) {
+        // We only care for incoming IQ that have not yet been processed
+        if (incoming && !processed && packet instanceof IQ) {
 
-			final IQ  iq = (IQ) packet;
-			final JID fromJID = iq.getFrom();
-			final JID toJID = iq.getTo();
+            final IQ  iq = (IQ) packet;
+            final JID fromJID = iq.getFrom();
+            final JID toJID = iq.getTo();
 
-			// Must be iq of type set and sent to remote users
-			if (!iq.getType().equals(IQ.Type.set) || server.isLocal(toJID)) {
-				return;
-			}
+            // Must be iq of type set and sent to remote users
+            if (!iq.getType().equals(IQ.Type.set) || server.isLocal(toJID)) {
+                return;
+            }
 
-			// With a pubsub requests
-			Element requestElement = iq.getChildElement();
-			if (!requestElement.getNamespace().equals(Namespace.get("http://jabber.org/protocol/pubsub"))) {
-				return;
-			}
+            // With a pubsub requests
+            Element requestElement = iq.getChildElement();
+            if (!requestElement.getNamespace().equals(Namespace.get("http://jabber.org/protocol/pubsub"))) {
+                return;
+            }
 
-			// With a subscibe or unsubscribe command
-			Element commandElement = requestElement.element("subscribe");
-			if (commandElement == null) {
-				commandElement = requestElement.element("unsubscribe");
-				if (commandElement == null) {
-					return;
-				}
-			}
-			
-			// Relating to the microblogging node
-			Attribute nodeAttribute = commandElement.attribute("node");
-			if (!(nodeAttribute != null &&
-				nodeAttribute.getValue().equals(PEPActivityHandler.NODE))) {
-				return;
-			}
-			
-			// Then we keep track of the subscribe/unsubscribe request
-			if (commandElement.getName().equals("subscribe")) {
-				ActivityManager.getInstance().subscribe(fromJID.toBareJID(), toJID.toBareJID());
-			} else {
-				ActivityManager.getInstance().unsubscribe(fromJID.toBareJID(), toJID.toBareJID());
-			}
-		}
-	}
+            // With a subscibe or unsubscribe command
+            Element commandElement = requestElement.element("subscribe");
+            if (commandElement == null) {
+                commandElement = requestElement.element("unsubscribe");
+                if (commandElement == null) {
+                    return;
+                }
+            }
+
+            // Relating to the microblogging node
+            Attribute nodeAttribute = commandElement.attribute("node");
+            if (!(nodeAttribute != null &&
+                nodeAttribute.getValue().equals(PEPActivityHandler.NODE))) {
+                return;
+            }
+
+            // Then we keep track of the subscribe/unsubscribe request
+            if (commandElement.getName().equals("subscribe")) {
+                ActivityManager.getInstance().subscribe(fromJID.toBareJID(), toJID.toBareJID());
+            } else {
+                ActivityManager.getInstance().unsubscribe(fromJID.toBareJID(), toJID.toBareJID());
+            }
+        }
+    }
 }

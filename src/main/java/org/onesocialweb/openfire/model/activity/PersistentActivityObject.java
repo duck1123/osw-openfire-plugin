@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.activity;
 
@@ -30,17 +30,16 @@ import org.onesocialweb.openfire.model.atom.PersistentAtomEntry;
 @Table(name="Objects")
 public class PersistentActivityObject extends PersistentAtomEntry implements ActivityObject {
 
-	@Basic
-	private String type;
+    @Basic
+    private String type;
 
-	@Override
-	public String getType() {
-		return type;
-	}
+    @Override
+    public String getType() {
+        return type;
+    }
 
-	@Override
-	public void setType(String type) {
-		this.type = type;
-	}
-
+    @Override
+    public void setType(String type) {
+        this.type = type;
+    }
 }

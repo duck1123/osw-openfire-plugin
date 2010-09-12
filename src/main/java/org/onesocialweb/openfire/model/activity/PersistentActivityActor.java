@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.activity;
 
@@ -23,5 +23,4 @@ import org.onesocialweb.openfire.model.atom.PersistentAtomPerson;
 
 @Entity(name="ActivityActor")
 public class PersistentActivityActor extends PersistentAtomPerson implements ActivityActor {
-
 }

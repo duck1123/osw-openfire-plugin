@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.atom;
 
@@ -24,75 +24,74 @@ import org.onesocialweb.model.atom.AtomPerson;
 @Entity(name="AtomPerson")
 public class PersistentAtomPerson extends PersistentAtomCommon implements AtomPerson {
 
-	@Basic
-	private String email;
-	
-	@Basic
-	private String name;
-	
-	@Basic
-	private String uri;
+    @Basic
+    private String email;
 
-	@Override
-	public String getEmail() {
-		return email;
-	}
+    @Basic
+    private String name;
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Basic
+    private String uri;
 
-	@Override
-	public String getUri() {
-		return uri;
-	}
+    @Override
+    public String getEmail() {
+        return email;
+    }
 
-	@Override
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    public String getUri() {
+        return uri;
+    }
 
-	@Override
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("[AtomPerson ");
-		if (name != null) {
-			buffer.append("name:" + name + " ");
-		}
-		if (email != null) {
-			buffer.append("email:" + email + " ");
-		}
-		if (uri != null) {
-			buffer.append("uri:" + uri + " ");
-		}
-		buffer.append("]");
-		return buffer.toString();
-	}
+    @Override
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	@Override
-	public boolean hasEmail() {
-		return email != null;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public boolean hasName() {
-		return name != null;
-	}
+    @Override
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 
-	@Override
-	public boolean hasUri() {
-		return uri != null;
-	}
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[AtomPerson ");
+        if (name != null) {
+            buffer.append("name:" + name + " ");
+        }
+        if (email != null) {
+            buffer.append("email:" + email + " ");
+        }
+        if (uri != null) {
+            buffer.append("uri:" + uri + " ");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
 
+    @Override
+    public boolean hasEmail() {
+        return email != null;
+    }
+
+    @Override
+    public boolean hasName() {
+        return name != null;
+    }
+
+    @Override
+    public boolean hasUri() {
+        return uri != null;
+    }
 }

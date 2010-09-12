@@ -34,78 +34,78 @@ import org.xmpp.packet.PacketError;
 
 public class ActivitySubscriptionsHandler extends PEPCommandHandler {
 
-	public static final String COMMAND = "subscriptions";
-	
-	private UserManager userManager;
+    public static final String COMMAND = "subscriptions";
 
-	private ActivityManager activityManager;
-	
-	public ActivitySubscriptionsHandler() {
-		super("OneSocialWeb - Retrieves a user subscriptions");
-	}
-	
-	@Override
-	public String getCommand() {
-		return COMMAND;
-	}
+    private UserManager userManager;
 
-	@SuppressWarnings({"deprecation"})
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		JID sender = packet.getFrom();
-		JID recipient = packet.getTo();
+    private ActivityManager activityManager;
 
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
+    public ActivitySubscriptionsHandler() {
+        super("OneSocialWeb - Retrieves a user subscriptions");
+    }
 
-			// If no recipient, we assume the recipient is the sender
-			if (recipient == null) {
-				recipient = sender;
-			}
-			
-			// A valid request is an IQ of type get, for a valid and local recipient
-			if (!(packet.getType().equals(IQ.Type.get) &&
-				recipient != null &&
-				recipient.getNode() != null &&
-				userManager.isRegisteredUser(recipient.getNode()))) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
+    @Override
+    public String getCommand() {
+        return COMMAND;
+    }
 
-			// Fetch the subscriptions
-			List<Subscription> subscriptions = activityManager.getSubscriptions(recipient.toBareJID());
+    @SuppressWarnings({"deprecation"})
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        JID sender = packet.getFrom();
+        JID recipient = packet.getTo();
 
-			// Send a success result
-			IQ result = IQ.createResultIQ(packet);
-			Element resultPubsubElement = result.setChildElement("pubsub", "http://jabber.org/protocol/pubsub");
-			Element resultPublishElement = resultPubsubElement.addElement("subscriptions", "http://jabber.org/protocol/pubsub");
-			resultPublishElement.addAttribute("node", PEPActivityHandler.NODE);
-			for (Subscription sub : subscriptions) {
-				Element subElement = resultPublishElement.addElement("subscription");
-				subElement.addAttribute("node", PEPActivityHandler.NODE);
-				subElement.addAttribute("jid", sub.getTarget());
-				subElement.addAttribute("subscription", "subscribed");
-				subElement.addAttribute("created", DefaultAtomHelper.format(sub.getCreated()));
-			}
-			return result;
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
 
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+            // If no recipient, we assume the recipient is the sender
+            if (recipient == null) {
+                recipient = sender;
+            }
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-		activityManager = ActivityManager.getInstance();
-	}
+            // A valid request is an IQ of type get, for a valid and local recipient
+            if (!(packet.getType().equals(IQ.Type.get) &&
+                recipient != null &&
+                recipient.getNode() != null &&
+                userManager.isRegisteredUser(recipient.getNode()))) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // Fetch the subscriptions
+            List<Subscription> subscriptions = activityManager.getSubscriptions(recipient.toBareJID());
+
+            // Send a success result
+            IQ result = IQ.createResultIQ(packet);
+            Element resultPubsubElement = result.setChildElement("pubsub", "http://jabber.org/protocol/pubsub");
+            Element resultPublishElement = resultPubsubElement.addElement("subscriptions", "http://jabber.org/protocol/pubsub");
+            resultPublishElement.addAttribute("node", PEPActivityHandler.NODE);
+            for (Subscription sub : subscriptions) {
+                Element subElement = resultPublishElement.addElement("subscription");
+                subElement.addAttribute("node", PEPActivityHandler.NODE);
+                subElement.addAttribute("jid", sub.getTarget());
+                subElement.addAttribute("subscription", "subscribed");
+                subElement.addAttribute("created", DefaultAtomHelper.format(sub.getCreated()));
+            }
+
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+        activityManager = ActivityManager.getInstance();
+    }
 }

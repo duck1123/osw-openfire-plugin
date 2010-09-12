@@ -18,8 +18,8 @@ package org.onesocialweb.openfire.exception;
 
 @SuppressWarnings("serial")
 public class InvalidNotificationException extends Exception {
-	
-	public InvalidNotificationException(String message) {
-		super(message);
-	}
+
+    public InvalidNotificationException(String message) {
+        super(message);
+    }
 }

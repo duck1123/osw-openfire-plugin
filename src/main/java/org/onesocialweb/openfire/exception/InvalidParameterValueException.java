@@ -19,20 +19,20 @@ package org.onesocialweb.openfire.exception;
 @SuppressWarnings("serial")
 public class InvalidParameterValueException extends Exception {
 
-	private final String parameter;
-	
-	private final String value;
+    private final String parameter;
 
-	public InvalidParameterValueException(String parameter, String value) {
-		this.parameter = parameter;
-		this.value = value;
-	}
-	
-	public String getParameter() {
-		return parameter;
-	}
+    private final String value;
 
-	public String getValue() {
-		return value;
-	}
+    public InvalidParameterValueException(String parameter, String value) {
+        this.parameter = parameter;
+        this.value = value;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

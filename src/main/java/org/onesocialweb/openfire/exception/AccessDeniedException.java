@@ -19,7 +19,7 @@ package org.onesocialweb.openfire.exception;
 @SuppressWarnings("serial")
 public class AccessDeniedException extends Exception {
 
-	public AccessDeniedException(String message) {
-		super(message);
-	}
+    public AccessDeniedException(String message) {
+        super(message);
+    }
 }

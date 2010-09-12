@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.acl;
 
@@ -21,9 +21,8 @@ import org.onesocialweb.xml.dom.AclDomReader;
 
 public class PersistentAclDomReader extends AclDomReader {
 
-	@Override
-	protected AclFactory getAclFactory() {
-		return new PersistentAclFactory();
-	}
-
+    @Override
+    protected AclFactory getAclFactory() {
+        return new PersistentAclFactory();
+    }
 }

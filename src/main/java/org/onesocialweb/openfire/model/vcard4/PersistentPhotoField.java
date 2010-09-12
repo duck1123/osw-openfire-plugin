@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.model.vcard4;
@@ -34,47 +34,47 @@ import org.onesocialweb.openfire.model.acl.PersistentAclRule;
 @Entity(name="PhotoField")
 public class PersistentPhotoField extends PhotoField {
 
-	@OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
-	private List<AclRule> rules = new ArrayList<AclRule>();
+    @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
+    private List<AclRule> rules = new ArrayList<AclRule>();
 
-	@Basic
-	private String uri;
-	
-	@Override
-	public String getUri() {
-		return uri;
-	}
+    @Basic
+    private String uri;
 
-	@Override
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+    @Override
+    public String getUri() {
+        return uri;
+    }
 
-	@Override
-	public void addAclRule(AclRule rule) {
-		rules.add(rule);
-	}
+    @Override
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 
-	@Override
-	public List<AclRule> getAclRules() {
-		return Collections.unmodifiableList(rules);
-	}
+    @Override
+    public void addAclRule(AclRule rule) {
+        rules.add(rule);
+    }
 
-	@Override
-	public void removeAclRule(AclRule rule) {
-		rules.remove(rule);
-	}
+    @Override
+    public List<AclRule> getAclRules() {
+        return Collections.unmodifiableList(rules);
+    }
 
-	@Override
-	public void setAclRules(List<AclRule> rules) {
-		this.rules = rules;
-	}
-	
-	@Override
-	public boolean hasAclRules() {
-		if (rules != null && rules.size() > 0) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public void removeAclRule(AclRule rule) {
+        rules.remove(rule);
+    }
+
+    @Override
+    public void setAclRules(List<AclRule> rules) {
+        this.rules = rules;
+    }
+
+    @Override
+    public boolean hasAclRules() {
+        if (rules != null && rules.size() > 0) {
+            return true;
+        }
+        return false;
+    }
 }

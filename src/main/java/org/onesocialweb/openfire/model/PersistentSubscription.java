@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model;
 
@@ -25,56 +25,55 @@ import javax.persistence.TemporalType;
 
 @Entity(name="Subscriptions")
 public class PersistentSubscription implements Subscription {
-	
-	@Basic
-	private String subscriber;
-	
-	@Basic
-	private String target;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date created;
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#getCreated()
-	 */
-	public Date getCreated() {
-		return created;
-	}
+    @Basic
+    private String subscriber;
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#setCreated(java.util.Date)
-	 */
-	public void setCreated(Date created) {
-		this.created = created;
-	}
+    @Basic
+    private String target;
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#getSubscriber()
-	 */
-	public String getSubscriber() {
-		return subscriber;
-	}
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#setSubscriber(java.lang.String)
-	 */
-	public void setSubscriber(String subscriber) {
-		this.subscriber = subscriber;
-	}
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#getCreated()
+     */
+    public Date getCreated() {
+        return created;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#getTarget()
-	 */
-	public String getTarget() {
-		return target;
-	}
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#setCreated(java.util.Date)
+     */
+    public void setCreated(Date created) {
+        this.created = created;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.onesocialweb.openfire.database.model.Subscription#setTarget(java.lang.String)
-	 */
-	public void setTarget(String target) {
-		this.target = target;
-	}
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#getSubscriber()
+     */
+    public String getSubscriber() {
+        return subscriber;
+    }
 
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#setSubscriber(java.lang.String)
+     */
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#getTarget()
+     */
+    public String getTarget() {
+        return target;
+    }
+
+    /* (non-Javadoc)
+     * @see org.onesocialweb.openfire.database.model.Subscription#setTarget(java.lang.String)
+     */
+    public void setTarget(String target) {
+        this.target = target;
+    }
 }

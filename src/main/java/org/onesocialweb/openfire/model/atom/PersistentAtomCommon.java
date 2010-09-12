@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.atom;
 
@@ -23,28 +23,27 @@ import org.onesocialweb.model.atom.AtomCommon;
 @MappedSuperclass
 public class PersistentAtomCommon implements AtomCommon {
 
-	private String xmlBase;
-	
-	private String xmlLang;
-	
-	@Override
-	public String getXmlBase() {
-		return xmlBase;
-	}
+    private String xmlBase;
 
-	@Override
-	public String getXmlLang() {
-		return xmlLang;
-	}
+    private String xmlLang;
 
-	@Override
-	public void setXmlBase(String xmlBase) {
-		this.xmlBase = xmlBase;
-	}
+    @Override
+    public String getXmlBase() {
+        return xmlBase;
+    }
 
-	@Override
-	public void setXmlLang(String xmlLang) {
-		this.xmlLang = xmlLang;
-	}
+    @Override
+    public String getXmlLang() {
+        return xmlLang;
+    }
 
+    @Override
+    public void setXmlBase(String xmlBase) {
+        this.xmlBase = xmlBase;
+    }
+
+    @Override
+    public void setXmlLang(String xmlLang) {
+        this.xmlLang = xmlLang;
+    }
 }

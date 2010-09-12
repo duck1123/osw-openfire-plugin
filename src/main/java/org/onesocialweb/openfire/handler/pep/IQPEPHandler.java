@@ -29,50 +29,50 @@ import org.jivesoftware.openfire.handler.IQHandler;
 import org.xmpp.packet.IQ;
 
 public class IQPEPHandler extends IQHandler {
-	
-	private XMPPServer server;
-	
-	private Map<String, PEPNodeHandler> handlers = new ConcurrentHashMap<String, PEPNodeHandler>();
-	
-	public IQPEPHandler() {
-		super("Intercept PEP request and divert to another handler based on node URI");
-	}
-	
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		this.server = server;
-	}
 
-	@Override
-	public IQHandlerInfo getInfo() {
-		return new IQHandlerInfo("pubsub", "http://jabber.org/protocol/pubsub");
-	}
+    private XMPPServer server;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		final Element childElement = packet.getChildElement();
-		final List<Element> pubsubElements = childElement.elements();
+    private Map<String, PEPNodeHandler> handlers = new ConcurrentHashMap<String, PEPNodeHandler>();
 
-		if (pubsubElements != null && pubsubElements.size() > 0) {
-			Element actionElement = pubsubElements.get(0);
-			Attribute node = actionElement.attribute("node");
-			PEPNodeHandler handler = getHandler(node.getValue());
-			if (handler != null) {
-				return handler.handleIQ(packet);
-			}
+    public IQPEPHandler() {
+        super("Intercept PEP request and divert to another handler based on node URI");
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        this.server = server;
+    }
+
+    @Override
+    public IQHandlerInfo getInfo() {
+        return new IQHandlerInfo("pubsub", "http://jabber.org/protocol/pubsub");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        final Element childElement = packet.getChildElement();
+        final List<Element> pubsubElements = childElement.elements();
+
+        if (pubsubElements != null && pubsubElements.size() > 0) {
+            Element actionElement = pubsubElements.get(0);
+            Attribute node = actionElement.attribute("node");
+            PEPNodeHandler handler = getHandler(node.getValue());
+            if (handler != null) {
+                return handler.handleIQ(packet);
+            }
         }
-        
-		return XMPPServer.getInstance().getIQPEPHandler().handleIQ(packet);
-	}
-	
-	public void addHandler(PEPNodeHandler handler) {
-		handler.initialize(server);
-		handlers.put(handler.getNode(), handler);
-	}
 
-	public PEPNodeHandler getHandler(String node) {
-		return handlers.get(node);
-	}
+        return XMPPServer.getInstance().getIQPEPHandler().handleIQ(packet);
+    }
+
+    public void addHandler(PEPNodeHandler handler) {
+        handler.initialize(server);
+        handlers.put(handler.getNode(), handler);
+    }
+
+    public PEPNodeHandler getHandler(String node) {
+        return handlers.get(node);
+    }
 }

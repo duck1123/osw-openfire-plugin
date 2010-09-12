@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.activity;
 
@@ -28,24 +28,23 @@ import org.onesocialweb.xml.dom.AtomDomReader;
 
 public class PersistentActivityDomReader extends ActivityDomReader {
 
-	@Override
-	protected AclDomReader getAclDomReader() {
-		return new PersistentAclDomReader();
-	}
+    @Override
+    protected AclDomReader getAclDomReader() {
+        return new PersistentAclDomReader();
+    }
 
-	@Override
-	protected ActivityFactory getActivityFactory() {
-		return new PersistentActivityFactory();
-	}
+    @Override
+    protected ActivityFactory getActivityFactory() {
+        return new PersistentActivityFactory();
+    }
 
-	@Override
-	protected AtomDomReader getAtomDomReader() {
-		return new PersistentAtomDomReader();
-	}
+    @Override
+    protected AtomDomReader getAtomDomReader() {
+        return new PersistentAtomDomReader();
+    }
 
-	@Override
-	protected Date parseDate(String atomDate) {
-		return DefaultAtomHelper.parseDate(atomDate);
-	}
-
+    @Override
+    protected Date parseDate(String atomDate) {
+        return DefaultAtomHelper.parseDate(atomDate);
+    }
 }

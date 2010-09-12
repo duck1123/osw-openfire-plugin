@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.model.vcard4;
@@ -35,47 +35,47 @@ import org.onesocialweb.openfire.model.acl.PersistentAclRule;
 @Entity(name="GenderField")
 public class PersistentGenderField extends GenderField {
 
-	@OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
-	private List<AclRule> rules = new ArrayList<AclRule>();
-	
-	@Enumerated(EnumType.ORDINAL)
-	private GenderField.Type type = GenderField.Type.NOTKNOWN;
-	
-	@Override
-	public Type getGender() {
-		return type;
-	}
+    @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
+    private List<AclRule> rules = new ArrayList<AclRule>();
 
-	@Override
-	public void setGender(Type type) {
-		this.type = type;
-	}
+    @Enumerated(EnumType.ORDINAL)
+    private GenderField.Type type = GenderField.Type.NOTKNOWN;
 
-	@Override
-	public void addAclRule(AclRule rule) {
-		rules.add(rule);
-	}
+    @Override
+    public Type getGender() {
+        return type;
+    }
 
-	@Override
-	public List<AclRule> getAclRules() {
-		return Collections.unmodifiableList(rules);
-	}
+    @Override
+    public void setGender(Type type) {
+        this.type = type;
+    }
 
-	@Override
-	public void removeAclRule(AclRule rule) {
-		rules.remove(rule);
-	}
+    @Override
+    public void addAclRule(AclRule rule) {
+        rules.add(rule);
+    }
 
-	@Override
-	public void setAclRules(List<AclRule> rules) {
-		this.rules = rules;
-	}
-	
-	@Override
-	public boolean hasAclRules() {
-		if (rules != null && rules.size() > 0) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public List<AclRule> getAclRules() {
+        return Collections.unmodifiableList(rules);
+    }
+
+    @Override
+    public void removeAclRule(AclRule rule) {
+        rules.remove(rule);
+    }
+
+    @Override
+    public void setAclRules(List<AclRule> rules) {
+        this.rules = rules;
+    }
+
+    @Override
+    public boolean hasAclRules() {
+        if (rules != null && rules.size() > 0) {
+            return true;
+        }
+        return false;
+    }
 }

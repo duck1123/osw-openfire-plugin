@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.model.vcard4;
@@ -40,81 +40,80 @@ import org.onesocialweb.openfire.model.acl.PersistentAclRule;
 @Entity(name="BirthdayField")
 public class PersistentBirthdayField extends BirthdayField {
 
-	@OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
-	private List<AclRule> rules = new ArrayList<AclRule>();
+    @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
+    private List<AclRule> rules = new ArrayList<AclRule>();
 
-	@Basic
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date birthday;
-	
-	@Enumerated(EnumType.ORDINAL)
-	private BirthdayField.Type type = BirthdayField.Type.DateTime;
-	
-	@Override
-	public String getBirthday() {
-		if (birthday != null) {
-			return formatDate(birthday);
-		} else {
-			return null;
-		}
-	}
+    @Basic
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date birthday;
 
-	@Override
-	public Date getDate() {
-		return birthday;
-	}
+    @Enumerated(EnumType.ORDINAL)
+    private BirthdayField.Type type = BirthdayField.Type.DateTime;
 
-	@Override
-	public Type getType() {
-		return type;
-	}
+    @Override
+    public String getBirthday() {
+        if (birthday != null) {
+            return formatDate(birthday);
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	public void setBirthday(String value, Type type) {
-		setDate(parseDate(value));
-		this.type = type;
-	}
+    @Override
+    public Date getDate() {
+        return birthday;
+    }
 
-	@Override
-	public void setDate(Date date) {
-		this.birthday = date;
-		this.type = BirthdayField.Type.DateTime;
-	}
+    @Override
+    public Type getType() {
+        return type;
+    }
 
-	@Override
-	public void addAclRule(AclRule rule) {
-		rules.add(rule);
-	}
+    @Override
+    public void setBirthday(String value, Type type) {
+        setDate(parseDate(value));
+        this.type = type;
+    }
 
-	@Override
-	public List<AclRule> getAclRules() {
-		return Collections.unmodifiableList(rules);
-	}
-	
-	@Override
-	public void setAclRules(List<AclRule> rules) {
-		this.rules = rules;
-	}	
+    @Override
+    public void setDate(Date date) {
+        this.birthday = date;
+        this.type = BirthdayField.Type.DateTime;
+    }
 
-	@Override
-	public void removeAclRule(AclRule rule) {
-		rules.remove(rule);
-	}
-	
-	@Override
-	public boolean hasAclRules() {
-		if (rules != null && rules.size() > 0) {
-			return true;
-		}
-		return false;
-	}
-	
-	protected Date parseDate(String dateString) {
-		return DefaultAtomHelper.parseDate(dateString);
-	}
-	
-	protected String formatDate(Date date) {
-		return DefaultAtomHelper.format(birthday);
-	}
-	
+    @Override
+    public void addAclRule(AclRule rule) {
+        rules.add(rule);
+    }
+
+    @Override
+    public List<AclRule> getAclRules() {
+        return Collections.unmodifiableList(rules);
+    }
+
+    @Override
+    public void setAclRules(List<AclRule> rules) {
+        this.rules = rules;
+    }
+
+    @Override
+    public void removeAclRule(AclRule rule) {
+        rules.remove(rule);
+    }
+
+    @Override
+    public boolean hasAclRules() {
+        if (rules != null && rules.size() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    protected Date parseDate(String dateString) {
+        return DefaultAtomHelper.parseDate(dateString);
+    }
+
+    protected String formatDate(Date date) {
+        return DefaultAtomHelper.format(birthday);
+    }
 }

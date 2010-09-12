@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.atom;
 
@@ -24,97 +24,96 @@ import org.onesocialweb.model.atom.AtomReplyTo;
 @Entity(name="AtomReplyTo")
 public class PersistentAtomReplyTo extends PersistentAtomCommon implements AtomReplyTo {
 
-	@Basic
-	private String ref;
-	
-	@Basic
-	private String href;
-	
-	@Basic
-	private String type;
-	
-	@Basic
-	private String source;
-	
-	@Override
-	public String getHref() {
-		return href;
-	}
+    @Basic
+    private String ref;
 
-	@Override
-	public String getRef() {
-		return ref;
-	}
+    @Basic
+    private String href;
 
-	@Override
-	public String getSource() {
-		return source;
-	}
+    @Basic
+    private String type;
 
-	@Override
-	public String getType() {
-		return type;
-	}
+    @Basic
+    private String source;
 
-	@Override
-	public boolean hasHref() {
-		return href != null;
-	}
+    @Override
+    public String getHref() {
+        return href;
+    }
 
-	@Override
-	public boolean hasRef() {
-		return ref != null;
-	}
+    @Override
+    public String getRef() {
+        return ref;
+    }
 
-	@Override
-	public boolean hasSource() {
-		return source != null;
-	}
+    @Override
+    public String getSource() {
+        return source;
+    }
 
-	@Override
-	public boolean hasType() {
-		return type != null;
-	}
+    @Override
+    public String getType() {
+        return type;
+    }
 
-	@Override
-	public void setHref(String href) {
-		this.href = href;
-	}
+    @Override
+    public boolean hasHref() {
+        return href != null;
+    }
 
-	@Override
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
+    @Override
+    public boolean hasRef() {
+        return ref != null;
+    }
 
-	@Override
-	public void setSource(String source) {
-		this.source = source;
-	}
+    @Override
+    public boolean hasSource() {
+        return source != null;
+    }
 
-	@Override
-	public void setType(String type) {
-		this.type = type;
-	}
+    @Override
+    public boolean hasType() {
+        return type != null;
+    }
+
+    @Override
+    public void setHref(String href) {
+        this.href = href;
+    }
+
+    @Override
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    @Override
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    @Override
+    public void setType(String type) {
+        this.type = type;
+    }
 
 
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("[AtomLink ");
-		if (href != null) {
-			buffer.append("href:" + href + " ");
-		}
-		if (ref != null) {
-			buffer.append("ref:" + ref + " ");
-		}
-		if (type != null) {
-			buffer.append("type:" + type + " ");
-		}
-		if (source != null) {
-			buffer.append("source:" + source + " ");
-		}		
-		buffer.append("]");
-		return buffer.toString();
-	}
-
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[AtomLink ");
+        if (href != null) {
+            buffer.append("href:" + href + " ");
+        }
+        if (ref != null) {
+            buffer.append("ref:" + ref + " ");
+        }
+        if (type != null) {
+            buffer.append("type:" + type + " ");
+        }
+        if (source != null) {
+            buffer.append("source:" + source + " ");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
 }

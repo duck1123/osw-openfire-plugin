@@ -40,88 +40,87 @@ import org.xmpp.packet.PacketError;
 
 public class IQRelationUpdateHandler extends IQHandler {
 
-	public static final String NAME = "update";
-	
-	public static final String NAMESPACE = "http://onesocialweb.org/spec/1.0/relations#update";
-	
-	private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
+    public static final String NAME = "update";
 
-	private UserManager userManager;
-	
-	private RelationManager relationManager;
-	
-	public IQRelationUpdateHandler() {
-		super("OneSocialWeb - Update relations handler");
-	}
+    public static final String NAMESPACE = "http://onesocialweb.org/spec/1.0/relations#update";
 
-	@Override
-	public IQHandlerInfo getInfo() {
-		return info;
-	}
+    private final IQHandlerInfo info = new IQHandlerInfo(NAME, NAMESPACE);
 
-	@SuppressWarnings( { "deprecation", "unchecked" })
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		final JID sender = packet.getFrom();
-		final JID recipient = packet.getTo();
+    private UserManager userManager;
 
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
+    private RelationManager relationManager;
 
-			// Only a local user can request to update a relation
-			if (!userManager.isRegisteredUser(sender.getNode())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
+    public IQRelationUpdateHandler() {
+        super("OneSocialWeb - Update relations handler");
+    }
 
-			// A valid request is an IQ of type set, sent to the bare server
-			if ((!packet.getType().equals(IQ.Type.set) || (recipient != null && recipient.getNode() != null))) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
+    @Override
+    public IQHandlerInfo getInfo() {
+        return info;
+    }
 
-			// A valid submit requets must contain one relation item
-			Element request = packet.getChildElement();
-			Iterator<Element> i_entry = request.elementIterator(QName.get(Onesocialweb.RELATION_ELEMENT, Namespace.get(Onesocialweb.NAMESPACE)));
-			if (!i_entry.hasNext()) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
+    @SuppressWarnings( { "deprecation", "unchecked" })
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        final JID sender = packet.getFrom();
+        final JID recipient = packet.getTo();
 
-			// Parse the relation
-			RelationDomReader reader = new PersistentRelationDomReader();
-			Element e_entry = i_entry.next();
-			PersistentRelation relation = (PersistentRelation) reader.readElement(new ElementAdapter(e_entry));
-			Log.debug("IQRelationUpdate received request: " + relation);
-			
-			// Setup the relation (this will also trigger the notification to the user)
-			relationManager.updateRelation(sender.toBareJID(), relation);
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
 
-			// Send a success result
-			IQ result = IQ.createResultIQ(packet);
-			return result;
+            // Only a local user can request to update a relation
+            if (!userManager.isRegisteredUser(sender.getNode())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
 
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+            // A valid request is an IQ of type set, sent to the bare server
+            if ((!packet.getType().equals(IQ.Type.set) || (recipient != null && recipient.getNode() != null))) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-		relationManager = RelationManager.getInstance();
-	}
+            // A valid submit requets must contain one relation item
+            Element request = packet.getChildElement();
+            Iterator<Element> i_entry = request.elementIterator(QName.get(Onesocialweb.RELATION_ELEMENT, Namespace.get(Onesocialweb.NAMESPACE)));
+            if (!i_entry.hasNext()) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // Parse the relation
+            RelationDomReader reader = new PersistentRelationDomReader();
+            Element e_entry = i_entry.next();
+            PersistentRelation relation = (PersistentRelation) reader.readElement(new ElementAdapter(e_entry));
+            Log.debug("IQRelationUpdate received request: " + relation);
+
+            // Setup the relation (this will also trigger the notification to the user)
+            relationManager.updateRelation(sender.toBareJID(), relation);
+
+            // Send a success result
+            IQ result = IQ.createResultIQ(packet);
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+        relationManager = RelationManager.getInstance();
+    }
 }

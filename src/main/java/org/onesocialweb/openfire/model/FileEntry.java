@@ -12,30 +12,29 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model;
 
 public interface FileEntry {
 
-	public String getId();
+    public String getId();
 
-	public void setId(String id);
+    public void setId(String id);
 
-	public String getName();
+    public String getName();
 
-	public void setName(String name);
+    public void setName(String name);
 
-	public String getType();
+    public String getType();
 
-	public void setType(String type);
+    public void setType(String type);
 
-	public String getOwner();
+    public String getOwner();
 
-	public void setOwner(String owner);
+    public void setOwner(String owner);
 
-	public long getSize();
+    public long getSize();
 
-	public void setSize(long size);
-
+    public void setSize(long size);
 }

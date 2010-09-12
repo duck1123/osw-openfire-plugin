@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model;
 
@@ -32,88 +32,89 @@ import org.onesocialweb.openfire.model.activity.PersistentActivityEntry;
 @Entity(name = "Messages")
 public class PersistentActivityMessage implements ActivityMessage {
 
-	@Basic
-	private String sender;
+    @Basic
+    private String sender;
 
-	@Basic
-	private String recipient;
+    @Basic
+    private String recipient;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date received;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date received;
 
-	@OneToOne(cascade = CascadeType.ALL, targetEntity = PersistentActivityEntry.class, fetch = FetchType.EAGER)
-	private ActivityEntry activity;
+    @OneToOne(cascade = CascadeType.ALL,
+              targetEntity = PersistentActivityEntry.class,
+              fetch = FetchType.EAGER)
+    private ActivityEntry activity;
 
-	@Override
-	public String getSender() {
-		return sender;
-	}
+    @Override
+    public String getSender() {
+        return sender;
+    }
 
-	@Override
-	public void setSender(String fromJID) {
-		this.sender = fromJID;
-	}
+    @Override
+    public void setSender(String fromJID) {
+        this.sender = fromJID;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.onesocialweb.openfire.model.ActivityMessage#getRecipient()
-	 */
-	@Override
-	public String getRecipient() {
-		return recipient;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.onesocialweb.openfire.model.ActivityMessage#getRecipient()
+     */
+    @Override
+    public String getRecipient() {
+        return recipient;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.onesocialweb.openfire.model.ActivityMessage#setRecipient(java.lang
-	 * .String)
-	 */
-	@Override
-	public void setRecipient(String userJID) {
-		this.recipient = userJID;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.onesocialweb.openfire.model.ActivityMessage#setRecipient(java.lang
+     * .String)
+     */
+    @Override
+    public void setRecipient(String userJID) {
+        this.recipient = userJID;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.onesocialweb.openfire.model.ActivityMessage#getReceived()
-	 */
-	public Date getReceived() {
-		return received;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.onesocialweb.openfire.model.ActivityMessage#getReceived()
+     */
+    public Date getReceived() {
+        return received;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.onesocialweb.openfire.model.ActivityMessage#setReceived(java.util
-	 * .Date)
-	 */
-	public void setReceived(Date received) {
-		this.received = received;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.onesocialweb.openfire.model.ActivityMessage#setReceived(java.util
+     * .Date)
+     */
+    public void setReceived(Date received) {
+        this.received = received;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.onesocialweb.openfire.model.ActivityMessage#getActivity()
-	 */
-	public ActivityEntry getActivity() {
-		return activity;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.onesocialweb.openfire.model.ActivityMessage#getActivity()
+     */
+    public ActivityEntry getActivity() {
+        return activity;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.onesocialweb.openfire.model.ActivityMessage#setActivity(org.onesocialweb
-	 * .model.activity.ActivityEntry)
-	 */
-	public void setActivity(ActivityEntry activity) {
-		this.activity = activity;
-	}
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.onesocialweb.openfire.model.ActivityMessage#setActivity(org.onesocialweb
+     * .model.activity.ActivityEntry)
+     */
+    public void setActivity(ActivityEntry activity) {
+        this.activity = activity;
+    }
 }

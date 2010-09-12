@@ -27,11 +27,11 @@ public abstract class PEPCommandHandler extends BasicModule {
      *
      * @param moduleName The name for the module or null to use the default
      */
-	public PEPCommandHandler(String moduleName) {
-		super(moduleName);
-	}
-	
-	public abstract IQ handleIQ(IQ packet) throws UnauthorizedException;
-    
-	public abstract String getCommand();
+    public PEPCommandHandler(String moduleName) {
+        super(moduleName);
+    }
+
+    public abstract IQ handleIQ(IQ packet) throws UnauthorizedException;
+
+    public abstract String getCommand();
 }

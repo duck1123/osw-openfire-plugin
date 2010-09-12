@@ -16,49 +16,48 @@ import org.onesocialweb.openfire.model.acl.PersistentAclRule;
 
 @Entity(name="URLField")
 public class PersistentUrlField extends URLField {
-	
-	@OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
-	private List<AclRule> rules = new ArrayList<AclRule>();
-	
-	@Basic
-	private String url;
-	
-	@Override
-	public String getURL() {
-		return url;
-	}
-	
-	@Override
-	public void setURL(String url) {
-		this.url = url;
-	}
-	
-	@Override
-	public void addAclRule(AclRule rule) {
-		rules.add(rule);
-	}
-	
-	@Override
-	public List<AclRule> getAclRules() {
-		return Collections.unmodifiableList(rules);
-	}
 
-	@Override
-	public void removeAclRule(AclRule rule) {
-		rules.remove(rule);
-	}
+    @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAclRule.class, fetch=FetchType.EAGER)
+    private List<AclRule> rules = new ArrayList<AclRule>();
 
-	@Override
-	public void setAclRules(List<AclRule> rules) {
-		this.rules = rules;
-	}
-	
-	@Override
-	public boolean hasAclRules() {
-		if (rules != null && rules.size() > 0) {
-			return true;
-		}
-		return false;
-	}
+    @Basic
+    private String url;
 
+    @Override
+    public String getURL() {
+        return url;
+    }
+
+    @Override
+    public void setURL(String url) {
+        this.url = url;
+    }
+
+    @Override
+    public void addAclRule(AclRule rule) {
+        rules.add(rule);
+    }
+
+    @Override
+    public List<AclRule> getAclRules() {
+        return Collections.unmodifiableList(rules);
+    }
+
+    @Override
+    public void removeAclRule(AclRule rule) {
+        rules.remove(rule);
+    }
+
+    @Override
+    public void setAclRules(List<AclRule> rules) {
+        this.rules = rules;
+    }
+
+    @Override
+    public boolean hasAclRules() {
+        if (rules != null && rules.size() > 0) {
+            return true;
+        }
+        return false;
+    }
 }

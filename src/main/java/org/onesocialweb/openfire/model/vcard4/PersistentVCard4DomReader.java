@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.vcard4;
 
@@ -23,14 +23,13 @@ import org.onesocialweb.xml.dom.VCard4DomReader;
 
 public class PersistentVCard4DomReader extends VCard4DomReader {
 
-	@Override
-	protected AclDomReader getAclDomReader() {
-		return new PersistentAclDomReader();
-	}
+    @Override
+    protected AclDomReader getAclDomReader() {
+        return new PersistentAclDomReader();
+    }
 
-	@Override
-	protected VCard4Factory getProfileFactory() {
-		return new PersistentProfileFactory();
-	}
-
+    @Override
+    protected VCard4Factory getProfileFactory() {
+        return new PersistentProfileFactory();
+    }
 }

@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 
 package org.onesocialweb.openfire.model.vcard4;
@@ -32,59 +32,58 @@ import org.onesocialweb.model.vcard4.VCard4Factory;
 
 public class PersistentProfileFactory extends VCard4Factory {
 
-	@Override
-	public BirthdayField birthday() {
-		return new PersistentBirthdayField();
-	}
+    @Override
+    public BirthdayField birthday() {
+        return new PersistentBirthdayField();
+    }
 
-	@Override
-	public FullNameField fullname() {
-		return new PersistentFullNameField();
-	}
+    @Override
+    public FullNameField fullname() {
+        return new PersistentFullNameField();
+    }
 
-	@Override
-	public GenderField gender() {
-		return new PersistentGenderField();
-	}
+    @Override
+    public GenderField gender() {
+        return new PersistentGenderField();
+    }
 
-	@Override
-	public NoteField note() {
-		return new PersistentNoteField();
-	}
+    @Override
+    public NoteField note() {
+        return new PersistentNoteField();
+    }
 
-	@Override
-	public PhotoField photo() {
-		return new PersistentPhotoField();
-	}
-	
-	@Override
-	public EmailField email() {
-		return new PersistentEmailField();
-	}
-	
-	@Override
-	public URLField url() {
-		return new PersistentUrlField();
-	}
-	
-	@Override
-	public NameField name() {
-		return new PersistentNameField();
-	}
-	
-	@Override
-	public TimeZoneField timeZone() {
-		return new PersistentTimeZoneField();
-	}
-	
-	@Override
-	public TelField tel() {
-		return new PersistentTelField();
-	}
+    @Override
+    public PhotoField photo() {
+        return new PersistentPhotoField();
+    }
 
-	@Override
-	public Profile profile() {
-		return new PersistentProfile();
-	}
+    @Override
+    public EmailField email() {
+        return new PersistentEmailField();
+    }
 
+    @Override
+    public URLField url() {
+        return new PersistentUrlField();
+    }
+
+    @Override
+    public NameField name() {
+        return new PersistentNameField();
+    }
+
+    @Override
+    public TimeZoneField timeZone() {
+        return new PersistentTimeZoneField();
+    }
+
+    @Override
+    public TelField tel() {
+        return new PersistentTelField();
+    }
+
+    @Override
+    public Profile profile() {
+        return new PersistentProfile();
+    }
 }

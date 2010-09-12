@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.activity;
 
@@ -24,24 +24,23 @@ import org.onesocialweb.model.activity.ActivityVerb;
 
 public class PersistentActivityFactory extends ActivityFactory {
 
-	@Override
-	public ActivityActor actor() {
-		return new PersistentActivityActor();
-	}
+    @Override
+    public ActivityActor actor() {
+        return new PersistentActivityActor();
+    }
 
-	@Override
-	public ActivityEntry entry() {
-		return new PersistentActivityEntry();
-	}
+    @Override
+    public ActivityEntry entry() {
+        return new PersistentActivityEntry();
+    }
 
-	@Override
-	public ActivityObject object() {
-		return new PersistentActivityObject();
-	}
+    @Override
+    public ActivityObject object() {
+        return new PersistentActivityObject();
+    }
 
-	@Override
-	public ActivityVerb verb() {
-		return new PersistentActivityVerb();
-	}
-
+    @Override
+    public ActivityVerb verb() {
+        return new PersistentActivityVerb();
+    }
 }

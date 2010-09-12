@@ -38,91 +38,99 @@ import org.xmpp.packet.PacketError;
 
 public class InboxQueryHandler extends PEPCommandHandler {
 
-	public static final String COMMAND = "items";
-	
-	private InboxManager inboxManager;
-	
-	private UserManager userManager;
+    public static final String COMMAND = "items";
 
-	public InboxQueryHandler() {
-		super("OneSocialWeb - Query a user activities");
-	}
+    private InboxManager inboxManager;
 
-	@Override
-	public String getCommand() {
-		return COMMAND;
-	}
-	
-	@SuppressWarnings({"deprecation"})
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		final JID sender = packet.getFrom();
-		final JID recipient = packet.getTo();
-		
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
-			// A valid request is an IQ of type get
-			if (!(packet.getType().equals(IQ.Type.get))) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// If a recipient is specified, it must be equal to the sender
-			// bareJID
-			if (recipient != null && !recipient.toString().equals(sender.toBareJID())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
+    private UserManager userManager;
 
-			// Only a local user has an inbox
-			if (!userManager.isRegisteredUser(sender.getNode())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
-			
-			// We fetch the notifications fot the requesting user
-			List<ActivityMessage> messages = inboxManager.getMessages(sender.toBareJID());
-			
-			// Prepare the result packet
-			ActivityDomWriter writer = new DefaultActivityDomWriter();
-			DOMDocument domDocument = new DOMDocument();
-			IQ result = IQ.createResultIQ(packet);
-			org.dom4j.Element pubsubElement = result.setChildElement("pubsub", "http://jabber.org/protocol/pubsub");
-			org.dom4j.Element itemsElement = pubsubElement.addElement("items");
-			itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+    public InboxQueryHandler() {
+        super("OneSocialWeb - Query a user activities");
+    }
 
-			for (ActivityMessage message : messages) {
-				Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
-				writer.write(message.getActivity(), entryElement);
-				domDocument.removeChild(entryElement);
-				org.dom4j.Element itemElement = itemsElement.addElement("item");
-				itemElement.addAttribute("id", message.getActivity().getId());
-				itemElement.add((org.dom4j.Element) entryElement);
-			}
-			
-			// Return and send the result packet
-			return result;
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
-	
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-		inboxManager = InboxManager.getInstance();
-	}
+    @Override
+    public String getCommand() {
+        return COMMAND;
+    }
+
+    @SuppressWarnings({"deprecation"})
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        final JID sender = packet.getFrom();
+        final JID recipient = packet.getTo();
+
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
+            // A valid request is an IQ of type get
+            if (!(packet.getType().equals(IQ.Type.get))) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
+
+            // If a recipient is specified, it must be equal to the sender
+            // bareJID
+            if (recipient != null &&
+                !recipient.toString().equals(sender.toBareJID())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
+
+            // Only a local user has an inbox
+            if (!userManager.isRegisteredUser(sender.getNode())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
+
+            // We fetch the notifications fot the requesting user
+            List<ActivityMessage> messages =
+                inboxManager.getMessages(sender.toBareJID());
+
+            // Prepare the result packet
+            ActivityDomWriter writer = new DefaultActivityDomWriter();
+            DOMDocument domDocument = new DOMDocument();
+            IQ result = IQ.createResultIQ(packet);
+            org.dom4j.Element pubsubElement =
+                result.setChildElement("pubsub",
+                                       "http://jabber.org/protocol/pubsub");
+            org.dom4j.Element itemsElement = pubsubElement.addElement("items");
+            itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+
+            for (ActivityMessage message : messages) {
+                Element entryElement =
+                    domDocument.createElementNS(Atom.NAMESPACE,
+                                                Atom.ENTRY_ELEMENT);
+
+                domDocument.appendChild(entryElement);
+                writer.write(message.getActivity(), entryElement);
+                domDocument.removeChild(entryElement);
+                org.dom4j.Element itemElement = itemsElement.addElement("item");
+                itemElement.addAttribute("id", message.getActivity().getId());
+                itemElement.add((org.dom4j.Element) entryElement);
+            }
+
+            // Return and send the result packet
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+        inboxManager = InboxManager.getInstance();
+    }
 }

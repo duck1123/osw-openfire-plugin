@@ -38,93 +38,92 @@ import org.xmpp.packet.PacketError;
 
 public class IQProfilePublishHandler extends IQHandler {
 
-	private final IQHandlerInfo info = new IQHandlerInfo("publish", "http://onesocialweb.org/spec/1.0/vcard4#publish");
+    private final IQHandlerInfo info = new IQHandlerInfo("publish", "http://onesocialweb.org/spec/1.0/vcard4#publish");
 
-	private UserManager userManager;
+    private UserManager userManager;
 
-	public IQProfilePublishHandler() {
-		super("OneSocialWeb - Publish profile handler");
-	}
+    public IQProfilePublishHandler() {
+        super("OneSocialWeb - Publish profile handler");
+    }
 
-	@Override
-	public IQHandlerInfo getInfo() {
-		return info;
-	}
+    @Override
+    public IQHandlerInfo getInfo() {
+        return info;
+    }
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public IQ handleIQ(IQ packet) throws UnauthorizedException {
-		final JID sender = packet.getFrom();
-		final JID recipient = packet.getTo();
+    @SuppressWarnings("deprecation")
+    @Override
+    public IQ handleIQ(IQ packet) throws UnauthorizedException {
+        final JID sender = packet.getFrom();
+        final JID recipient = packet.getTo();
 
-		// Process the request inside a try/catch so that unhandled exceptions
-		// (oufofbounds etc...) can trigger a server error and we can send a
-		// error result packet
-		try {
+        // Process the request inside a try/catch so that unhandled exceptions
+        // (oufofbounds etc...) can trigger a server error and we can send a
+        // error result packet
+        try {
 
-			// A valid request is an IQ of type set,
-			if (!packet.getType().equals(IQ.Type.set)) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
-			
-			// If a recipient is specified, it must be equal to the sender
-			// bareJID
-			if (recipient != null && !recipient.toString().equals(sender.toBareJID())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
-			
-			// Only a local user can publish its profile
-			if (!userManager.isRegisteredUser(sender.getNode())) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.not_authorized);
-				return result;
-			}
+            // A valid request is an IQ of type set,
+            if (!packet.getType().equals(IQ.Type.set)) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
 
-			// A valid submit requets must contain a vcard4 entry
-			Element request = packet.getChildElement();
-			Element e_profile = request.element(QName.get(VCard4.VCARD_ELEMENT, VCard4.NAMESPACE));
-			if (e_profile == null) {
-				IQ result = IQ.createResultIQ(packet);
-				result.setChildElement(packet.getChildElement().createCopy());
-				result.setError(PacketError.Condition.bad_request);
-				return result;
-			}
+            // If a recipient is specified, it must be equal to the sender
+            // bareJID
+            if (recipient != null && !recipient.toString().equals(sender.toBareJID())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
 
-			// Parse the profile
-			VCard4DomReader reader = new PersistentVCard4DomReader();
-			Profile profile = reader.readProfile(new ElementAdapter(e_profile));
-			
-			// Commit the profile (this will also trigger the messages)
-			try {
-				ProfileManager.getInstance().publishProfile(sender.toBareJID(), profile);
-			} catch (UserNotFoundException e) {
-				// We know this cannot happen
-			}
+            // Only a local user can publish its profile
+            if (!userManager.isRegisteredUser(sender.getNode())) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.not_authorized);
+                return result;
+            }
 
-			// Send a success result
-			// TODO should this contain more, like the ID of the new activities ?
-			IQ result = IQ.createResultIQ(packet);
-			return result;
+            // A valid submit requets must contain a vcard4 entry
+            Element request = packet.getChildElement();
+            Element e_profile = request.element(QName.get(VCard4.VCARD_ELEMENT, VCard4.NAMESPACE));
+            if (e_profile == null) {
+                IQ result = IQ.createResultIQ(packet);
+                result.setChildElement(packet.getChildElement().createCopy());
+                result.setError(PacketError.Condition.bad_request);
+                return result;
+            }
 
-		} catch (Exception e) {
-			Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
-			IQ result = IQ.createResultIQ(packet);
-			result.setChildElement(packet.getChildElement().createCopy());
-			result.setError(PacketError.Condition.internal_server_error);
-			return result;
-		}
-	}
+            // Parse the profile
+            VCard4DomReader reader = new PersistentVCard4DomReader();
+            Profile profile = reader.readProfile(new ElementAdapter(e_profile));
 
-	@Override
-	public void initialize(XMPPServer server) {
-		super.initialize(server);
-		userManager = server.getUserManager();
-	}
+            // Commit the profile (this will also trigger the messages)
+            try {
+                ProfileManager.getInstance().publishProfile(sender.toBareJID(), profile);
+            } catch (UserNotFoundException e) {
+                // We know this cannot happen
+            }
+
+            // Send a success result
+            // TODO should this contain more, like the ID of the new activities ?
+            IQ result = IQ.createResultIQ(packet);
+            return result;
+        } catch (Exception e) {
+            Log.error(LocaleUtils.getLocalizedString("admin.error"), e);
+            IQ result = IQ.createResultIQ(packet);
+            result.setChildElement(packet.getChildElement().createCopy());
+            result.setError(PacketError.Condition.internal_server_error);
+            return result;
+        }
+    }
+
+    @Override
+    public void initialize(XMPPServer server) {
+        super.initialize(server);
+        userManager = server.getUserManager();
+    }
 }

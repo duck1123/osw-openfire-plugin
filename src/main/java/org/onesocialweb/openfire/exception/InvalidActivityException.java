@@ -19,7 +19,7 @@ package org.onesocialweb.openfire.exception;
 @SuppressWarnings("serial")
 public class InvalidActivityException extends Exception {
 
-	public InvalidActivityException(String message) {
-		super(message);
-	}
+    public InvalidActivityException(String message) {
+        super(message);
+    }
 }

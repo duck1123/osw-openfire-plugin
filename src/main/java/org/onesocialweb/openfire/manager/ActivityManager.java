@@ -73,640 +73,639 @@ import org.xmpp.packet.Message;
  */
 public class ActivityManager {
 
-	/**
-	 * Singleton: keep a static reference to teh only instance
-	 */
-	private static ActivityManager instance;
+    /**
+     * Singleton: keep a static reference to teh only instance
+     */
+    private static ActivityManager instance;
 
-	public static ActivityManager getInstance() {
-		if (instance == null) {
-			// Carefull, we are in a threaded environment !
-			synchronized (ActivityManager.class) {
-				instance = new ActivityManager();
-			}
-		}
-		return instance;
-	}
+    public static ActivityManager getInstance() {
+        if (instance == null) {
+            // Carefull, we are in a threaded environment !
+            synchronized (ActivityManager.class) {
+                instance = new ActivityManager();
+            }
+        }
+        return instance;
+    }
 
-	/**
-	 * Class dependencies
-	 * TODO Make this a true dependency injection
-	 */
-	private final ActivityFactory activityFactory;
+    /**
+     * Class dependencies
+     * TODO Make this a true dependency injection
+     */
+    private final ActivityFactory activityFactory;
 
-	private final AclFactory aclFactory;
-	
-	private final AtomFactory atomFactory;
+    private final AclFactory aclFactory;
 
-	/**
-	 * Publish a new activity to the activity stream of the given user.
-	 * activity-actor element is overwrittern using the user profile data to
-	 * avoid spoofing. Notifications messages are sent to the users subscribed
-	 * to this user activities.
-	 *
-	 * @param user
-	 *            The user who the activity belongs to
-	 * @param entry
-	 *            The activity entry to publish
-	 * @throws UserNotFoundException
-	 */
-	public void publishActivity(String userJID, ActivityEntry entry) throws UserNotFoundException {
-		// Overide the actor to avoid spoofing
-		User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
-		ActivityActor actor = activityFactory.actor();
-		actor.setUri(userJID);
-		actor.setName(user.getName());
-		actor.setEmail(user.getEmail());
+    private final AtomFactory atomFactory;
 
-		// Persist the activities
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		entry.setId(DefaultAtomHelper.generateId());
-		for (ActivityObject object : entry.getObjects()) {
-			object.setId(DefaultAtomHelper.generateId());
-		}
-		entry.setActor(actor);
-		entry.setPublished(Calendar.getInstance().getTime());
-		em.persist(entry);
-		em.getTransaction().commit();
-		em.close();
+    /**
+     * Publish a new activity to the activity stream of the given user.
+     * activity-actor element is overwrittern using the user profile data to
+     * avoid spoofing. Notifications messages are sent to the users subscribed
+     * to this user activities.
+     *
+     * @param user
+     *            The user who the activity belongs to
+     * @param entry
+     *            The activity entry to publish
+     * @throws UserNotFoundException
+     */
+    public void publishActivity(String userJID, ActivityEntry entry) throws UserNotFoundException {
+        // Overide the actor to avoid spoofing
+        User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
+        ActivityActor actor = activityFactory.actor();
+        actor.setUri(userJID);
+        actor.setName(user.getName());
+        actor.setEmail(user.getEmail());
 
-		// Broadcast the notifications
-		notify(userJID, entry);
-	}
-	
-	/**
-	 * Updates an activity in the activity stream of the given user.
-	 * activity-actor element is overwrittern using the user profile data to
-	 * avoid spoofing. Notifications messages are sent to the users subscribed
-	 * to this user activities.
-	 *
-	 * @param user
-	 *            The user who the activity belongs to
-	 * @param entry
-	 *            The activity entry to update
-	 * @throws UserNotFoundException
-	 */
-	public void updateActivity(String userJID, ActivityEntry entry) throws UserNotFoundException, UnauthorizedException {
-		// Overide the actor to avoid spoofing
-		User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
-		ActivityActor actor = activityFactory.actor();
-		actor.setUri(userJID);
-		actor.setName(user.getName());
-		actor.setEmail(user.getEmail());
-		
-		// Persist the activities
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		PersistentActivityEntry oldEntry = em.find(PersistentActivityEntry.class, entry.getId());
+        // Persist the activities
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
+        entry.setId(DefaultAtomHelper.generateId());
+        for (ActivityObject object : entry.getObjects()) {
+            object.setId(DefaultAtomHelper.generateId());
+        }
+        entry.setActor(actor);
+        entry.setPublished(Calendar.getInstance().getTime());
+        em.persist(entry);
+        em.getTransaction().commit();
+        em.close();
 
-		if ((oldEntry == null) || (!oldEntry.getActor().getUri().equalsIgnoreCase(userJID)))
-			throw new UnauthorizedException();
-		
-		if (oldEntry != null) {
-			em.remove(oldEntry);
-		}
-		
-		entry.setActor(actor);
-		entry.setPublished(Calendar.getInstance().getTime());
-		em.persist(entry);
-		em.getTransaction().commit();
-		em.close();
+        // Broadcast the notifications
+        notify(userJID, entry);
+    }
 
-		// Broadcast the notifications
-		notify(userJID, entry);
-	}
-	
-	
-	/**
-	 * Updates an activity in the activity stream of the given user.
-	 * activity-actor element is overwrittern using the user profile data to
-	 * avoid spoofing. Notifications messages are sent to the users subscribed
-	 * to this user activities.
-	 *
-	 * @param user
-	 *            The user who the activity belongs to
-	 * @param entry
-	 *            The activity entry to update
-	 * @throws UserNotFoundException
-	 */
-	public void commentActivity(String userJID, ActivityEntry commentEntry)
-		throws UserNotFoundException, UnauthorizedException {
-		// Overide the actor to avoid spoofing
-		User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
-		ActivityActor actor = activityFactory.actor();
-		actor.setUri(userJID);
-		actor.setName(user.getName());
-		actor.setEmail(user.getEmail());
-		commentEntry.setActor(actor);
-		
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		
-		//validate that we have visibility of the original post...
-		String idParent = commentEntry.getParentId();
-		PersistentActivityEntry originalEntry = em.find(PersistentActivityEntry.class, idParent);
-		
-		if (originalEntry == null) {
-			throw new UnauthorizedException();
-		}
-		
-		// Broadcast a notification to the owner of the original post...
-		notifyComment(userJID, originalEntry.getActor().getUri(), commentEntry);
-	}
-	
-	public void deleteActivity(String fromJID, String activityId) throws UnauthorizedException {
-		
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		
-		PersistentActivityEntry activity = em.find(PersistentActivityEntry.class, activityId);
+    /**
+     * Updates an activity in the activity stream of the given user.
+     * activity-actor element is overwrittern using the user profile data to
+     * avoid spoofing. Notifications messages are sent to the users subscribed
+     * to this user activities.
+     *
+     * @param user
+     *            The user who the activity belongs to
+     * @param entry
+     *            The activity entry to update
+     * @throws UserNotFoundException
+     */
+    public void updateActivity(String userJID, ActivityEntry entry) throws UserNotFoundException, UnauthorizedException {
+        // Overide the actor to avoid spoofing
+        User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
+        ActivityActor actor = activityFactory.actor();
+        actor.setUri(userJID);
+        actor.setName(user.getName());
+        actor.setEmail(user.getEmail());
 
-		if ((activity==null) || (!activity.getActor().getUri().equalsIgnoreCase(fromJID))) {
-			throw new UnauthorizedException();
-		}
+        // Persist the activities
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
+        PersistentActivityEntry oldEntry = em.find(PersistentActivityEntry.class, entry.getId());
 
-		if (activity.hasReplies()) {
-			Query query = em.createQuery("SELECT x FROM ActivityEntry x WHERE x.parentId = ?1");
-			query.setParameter(1, activity.getId());
-			List<ActivityEntry> replies = query.getResultList();
-			
-			for (ActivityEntry reply : replies) {
-				em.remove(reply);
-			}
-		}
-		
-		em.remove(activity);
-		
-		em.getTransaction().commit();
-		em.close();
-		
-		notifyDelete(fromJID, activityId);
-	}
-	
-	
-	public void deleteMessage(String activityId)  {
-		
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		
-		Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
-		query.setParameter(1, activityId);
-		List<ActivityMessage> messages = query.getResultList();
-		for (ActivityMessage message:messages){
-			em.remove(message);
-		}
-		
-		em.getTransaction().commit();
-		em.close();
-	
-	}
+        if ((oldEntry == null) || (!oldEntry.getActor().getUri().equalsIgnoreCase(userJID)))
+            throw new UnauthorizedException();
 
-	/**
-	 * Retrieve the last activities of the target user, taking into account the
-	 * access rights of the requesting user.
-	 *
-	 * @param requestorJID
-	 *            the user requesting the activities
-	 * @param targetJID
-	 *            the user whose activities are requested
-	 * @return an immutable list of the last activities of the target entity that can be seen by the
-	 *         requesting entity
-	 * @throws UserNotFoundException
-	 */
-	@SuppressWarnings("unchecked")
-	public List<ActivityEntry> getActivities(String requestorJID, String targetJID)
-		throws UserNotFoundException {
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		Query query = em.createQuery("SELECT DISTINCT entry FROM ActivityEntry entry" +
-									"    JOIN entry.rules rule " +
-									"    JOIN rule.actions action " +
-									"    JOIN rule.subjects subject " +
-									"    WHERE entry.actor.uri = :target " +
-									"    AND action.name = :view " +
-									"    AND action.permission = :grant " +
-									"    AND (subject.type = :everyone " +
-									"        OR (subject.type = :group_type " +
-									"            AND subject.name IN (:groups)) " +
-									"        OR (subject.type = :person " +
-									"            AND subject.name = :jid)) " +
-									"    ORDER BY entry.published DESC");
+        if (oldEntry != null) {
+            em.remove(oldEntry);
+        }
 
-		// Parametrize the query
-		query.setParameter("target", targetJID);
-		query.setParameter("view", AclAction.ACTION_VIEW);
-		query.setParameter("grant", AclAction.PERMISSION_GRANT);
-		query.setParameter("everyone", AclSubject.EVERYONE);
-		query.setParameter("group_type", AclSubject.GROUP);
-		query.setParameter("groups", getGroups(targetJID, requestorJID));
-		query.setParameter("person", AclSubject.PERSON);
-		query.setParameter("jid", requestorJID);
-		query.setMaxResults(20);
-		List<ActivityEntry> result = query.getResultList();
-		em.close();
+        entry.setActor(actor);
+        entry.setPublished(Calendar.getInstance().getTime());
+        em.persist(entry);
+        em.getTransaction().commit();
+        em.close();
 
-		return Collections.unmodifiableList(result);
-	}
-
-	/**
-	 * Handle an activity pubsub event. Such a message is usually
-	 * received by a user in these conditions: - the local user has subscribed
-	 * to the remote user activities - the local user is "mentionned" in this
-	 * activity - this activity relates to another activity of the local user
-	 *
-	 * @param remoteJID
-	 *            the entity sending the message
-	 * @param localJID
-	 *            the entity having received the message
-	 * @param activity
-	 *            the activity contained in the message
-	 * @throws InvalidActivityException
-	 * @throws AccessDeniedException
-	 */
-	public synchronized void handleMessage(String remoteJID, String localJID, ActivityEntry activity)
-		throws InvalidActivityException, AccessDeniedException {
-
-		// Validate the activity
-		if (activity == null || !activity.hasId()) {
-			throw new InvalidActivityException();
-		}
-		
-		// Create a message for the recipient
-		ActivityMessage message = new PersistentActivityMessage();
-		message.setSender(remoteJID);
-		message.setRecipient(localJID);
-		message.setReceived(Calendar.getInstance().getTime());
-
-		// Search if the activity exists in the database
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		PersistentActivityEntry previousActivity = em.find(PersistentActivityEntry.class, activity.getId());
-
-		// Assign the activity to the existing one if it exists
-		if (previousActivity != null) {
-			message.setActivity(previousActivity);
-		} else {
-			message.setActivity(activity);
-		}
-		
-		//in case of an update the message will already exist in the DB
-		Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
-		query.setParameter(1, activity.getId());
-		List<ActivityMessage> messages = query.getResultList();
-		
-		em.getTransaction().begin();
-		for (ActivityMessage oldMessage : messages){
-			if (oldMessage.getRecipient().equalsIgnoreCase(localJID))
-				em.remove(oldMessage);
-		}
-		em.getTransaction().commit();
-
-		// We go ahead and post the message to the recipient mailbox
-		em.getTransaction().begin();
-		em.persist(message);
-		em.getTransaction().commit();
-		em.close();
-	}
-
-	public synchronized void handleComment(String remoteJID, String localJID, ActivityEntry commentEntry)
-		throws UnauthorizedException, UserNotFoundException,
-			InvalidActivityException, AccessDeniedException {
-
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		em.getTransaction().begin();
-		String parentJID = commentEntry.getParentJID();
-
-		if (parentJID.equalsIgnoreCase(localJID)){
-			// store the comment
-			// first we update it... comment should already have all the links about
-			// being a reply...
-			commentEntry.setId(DefaultAtomHelper.generateId());
-			for (ActivityObject object : commentEntry.getObjects()) {
-				object.setId(DefaultAtomHelper.generateId());
-			}
-			commentEntry.setPublished(Calendar.getInstance().getTime());
-			em.persist(commentEntry);
-		}
-		
-		PersistentActivityEntry parentActivity = em.find(PersistentActivityEntry.class, commentEntry.getParentId());
-
-		if (parentActivity == null) {
-			throw new UnauthorizedException();
-		}
-
-		// update original...to increase the number of replies, unless the comment
-		// already exists which means that the activity was already increased once
-
-		String domainOrigin = new JID(parentActivity.getActor().getUri()).getDomain();
-		String domainLocal = new JID(localJID).getDomain();
+        // Broadcast the notifications
+        notify(userJID, entry);
+    }
 
 
-		boolean alreadyUpdated = domainOrigin.equalsIgnoreCase(domainLocal) &&
-			!localJID.equalsIgnoreCase(parentActivity.getActor().getUri());
+    /**
+     * Updates an activity in the activity stream of the given user.
+     * activity-actor element is overwrittern using the user profile data to
+     * avoid spoofing. Notifications messages are sent to the users subscribed
+     * to this user activities.
+     *
+     * @param user
+     *            The user who the activity belongs to
+     * @param entry
+     *            The activity entry to update
+     * @throws UserNotFoundException
+     */
+    public void commentActivity(String userJID, ActivityEntry commentEntry)
+        throws UserNotFoundException, UnauthorizedException {
+        // Overide the actor to avoid spoofing
+        User user = UserManager.getInstance().getUser(new JID(userJID).getNode());
+        ActivityActor actor = activityFactory.actor();
+        actor.setUri(userJID);
+        actor.setName(user.getName());
+        actor.setEmail(user.getEmail());
+        commentEntry.setActor(actor);
 
-		if (!alreadyUpdated) {
-			if (parentActivity.hasReplies()) {
-				AtomLink repliesLink = parentActivity.getRepliesLink();
-				parentActivity.removeLink(repliesLink);
-				repliesLink.setCount(repliesLink.getCount() + 1);
-				parentActivity.addLink(repliesLink);
-			} else {
-				parentActivity.addLink(atomFactory.link(null, "replies", null, "application/atom+xml", 1));
-			}
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
 
-			em.remove(parentActivity);
-			em.persist(parentActivity);
-		}
+        //validate that we have visibility of the original post...
+        String idParent = commentEntry.getParentId();
+        PersistentActivityEntry originalEntry = em.find(PersistentActivityEntry.class, idParent);
 
-		em.getTransaction().commit();
-		em.close();
+        if (originalEntry == null) {
+            throw new UnauthorizedException();
+        }
 
-		if (localJID.equalsIgnoreCase(parentActivity.getActor().getUri())) {
-			notify(localJID, commentEntry);
-		}
-	}
+        // Broadcast a notification to the owner of the original post...
+        notifyComment(userJID, originalEntry.getActor().getUri(), commentEntry);
+    }
 
-	/**
-	 * Subscribe an entity to another entity activities.
-	 *
-	 * @param from the subscriber
-	 * @param to entity being subscribed to
-	 * @throws AlreadySubscribed
-	 */
-	@SuppressWarnings("unchecked")
-	public synchronized void subscribe(String from, String to) {
-		
-		// Check if it already exist
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1 AND x.target = ?2");
-		query.setParameter(1, from);
-		query.setParameter(2, to);
-		List<Subscription> subscriptions = query.getResultList();
-		
-		// If already exist, we don't have anything left to do
-		if (subscriptions != null && subscriptions.size() > 0) {
-			em.close();
-			return;
-		}
-		
-		// Add the subscription
-		Subscription subscription = new PersistentSubscription();
-		subscription.setSubscriber(from);
-		subscription.setTarget(to);
-		subscription.setCreated(Calendar.getInstance().getTime());
-		
-		// Store
-		em.getTransaction().begin();
-		em.persist(subscription);
-		em.getTransaction().commit();
-		em.close();
-	}
-	
+    public void deleteActivity(String fromJID, String activityId) throws UnauthorizedException {
 
-	/**
-	 * Delete a subscription.
-	 *
-	 * @param from the entity requesting to unsubscribe
-	 * @param to the subscription target
-	 * @throws SubscriptionNotFound
-	 */
-	@SuppressWarnings("unchecked")
-	public synchronized void unsubscribe(String from, String to) {
-		EntityManager em  = OswPlugin.getEmFactory().createEntityManager();
-		
-		// Check if it already exist
-		Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1 AND x.target = ?2");
-		query.setParameter(1, from);
-		query.setParameter(2, to);
-		List<Subscription> subscriptions = query.getResultList();
-		
-		// If it does not exist, we don't have anything left to do
-		if (subscriptions == null || subscriptions.size()== 0) {
-			em.close();
-			return;
-		}
-		
-		// Remove the subscriptions
-		// There should never be more than one.. but better safe than sorry
-		em.getTransaction().begin();
-		for (Subscription activitySubscription : subscriptions) {
-			em.remove(activitySubscription);
-		}
-		em.getTransaction().commit();
-		em.close();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<Subscription> getSubscribers(String targetJID) {
-		// Get a list of people who are interested by this stuff
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.target = ?1");
-		query.setParameter(1, targetJID);
-		List<Subscription> subscriptions = query.getResultList();
-		em.close();
-		return subscriptions;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<Subscription> getSubscriptions(String subscriberJID) {
-		// Get a list of people who are interested by this stuff
-		final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
-		Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1");
-		query.setParameter(1, subscriberJID);
-		List<Subscription> subscriptions = query.getResultList();
-		em.close();
-		return subscriptions;
-	}
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
 
-	private void notify(String fromJID, ActivityEntry entry) throws UserNotFoundException {
+        PersistentActivityEntry activity = em.find(PersistentActivityEntry.class, activityId);
 
-		// TODO We may want to do some cleaning of activities before
-		// forwarding them (e.g. remove the acl, it is no one business)
-		final ActivityDomWriter writer = new DefaultActivityDomWriter();
-		final XMPPServer server = XMPPServer.getInstance();
-		final List<Subscription> subscriptions = getSubscribers(fromJID);
-	//	final Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(new JID(fromJID).getNode());
-		final DOMDocument domDocument = new DOMDocument();
+        if ((activity==null) || (!activity.getActor().getUri().equalsIgnoreCase(fromJID))) {
+            throw new UnauthorizedException();
+        }
 
-		// Prepare the message
-		final Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
-		writer.write(entry, entryElement);
-		domDocument.removeChild(entryElement);
+        if (activity.hasReplies()) {
+            Query query = em.createQuery("SELECT x FROM ActivityEntry x WHERE x.parentId = ?1");
+            query.setParameter(1, activity.getId());
+            List<ActivityEntry> replies = query.getResultList();
 
-		final Message message = new Message();
-		message.setFrom(fromJID);
-		message.setSubject("New activity");
-		
-		String messageBody = "";
-		
-		if (entry.hasRecipients()) {
-			messageBody += "Recipients: ";
-			
-			for (AtomReplyTo recipient : entry.getRecipients()) {
-				messageBody += recipient.getHref() + "; ";
-			}
-			
-			messageBody += "\n\n";
-		}
-        
-		messageBody += entry.getTitle();
-		
-		message.setBody(messageBody);
-		message.setType(Message.Type.headline);
-		org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
-		org.dom4j.Element itemsElement = eventElement.addElement("items");
-		itemsElement.addAttribute("node", PEPActivityHandler.NODE);
-		org.dom4j.Element itemElement = itemsElement.addElement("item");
-		itemElement.addAttribute("id", entry.getId());
-		itemElement.add((org.dom4j.Element) entryElement);
+            for (ActivityEntry reply : replies) {
+                em.remove(reply);
+            }
+        }
 
-		// Keep a list of people we sent it to avoid duplicates
-		List<String> alreadySent = new ArrayList<String>();
-		
-		// Send to this user
-		if (entry.getParentId()==null){
-			alreadySent.add(fromJID);
-			message.setTo(fromJID);
-			server.getMessageRouter().route(message);
-		}
-		
-		// Send to all subscribers
-		for (Subscription activitySubscription : subscriptions) {
-			String recipientJID = activitySubscription.getSubscriber();
-			if (!canSee(fromJID, entry, recipientJID)) {
-				continue;
-			}
-			
-			alreadySent.add(recipientJID);
-			message.setTo(recipientJID);
-			server.getMessageRouter().route(message);
-		}
+        em.remove(activity);
 
-		// Send to recipients, if they can see it and have not already received it
-		if (entry.hasRecipients()) {
-			for (AtomReplyTo recipient : entry.getRecipients()) {
-				// TODO This is dirty, the recipient should be an IRI etc...
-				String recipientJID = recipient.getHref();
-				if (recipientJID == null || recipientJID.length() == 0) {
-					continue;
-				}
-				
-				if (!alreadySent.contains(recipientJID) && canSee(fromJID, entry, recipientJID)) {
-					alreadySent.add(fromJID);
-					
-					message.setTo(recipientJID);
-					server.getMessageRouter().route(message);
-				}
-			}
-		}
-	}
-	
-	private void notifyComment(String fromJID, String toJID, ActivityEntry entry)
-		throws UserNotFoundException {
-		
-		// TODO We may want to do some cleaning of activities before
-		// forwarding them (e.g. remove the acl, it is no one business)
-		final ActivityDomWriter writer = new DefaultActivityDomWriter();
-		final XMPPServer server = XMPPServer.getInstance();
-		
-		final DOMDocument domDocument = new DOMDocument();
+        em.getTransaction().commit();
+        em.close();
 
-		// Prepare the message
-		final Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
-		writer.write(entry, entryElement);
-		domDocument.removeChild(entryElement);
+        notifyDelete(fromJID, activityId);
+    }
 
-		final Message message = new Message();
-		message.setFrom(fromJID);
-		message.setBody("New activity: " + entry.getTitle());
-		message.setType(Message.Type.headline);
-		org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
-		org.dom4j.Element itemsElement = eventElement.addElement("items");
-		itemsElement.addAttribute("node", PEPActivityHandler.NODE);
-		org.dom4j.Element itemElement = itemsElement.addElement("item");
-		itemElement.addAttribute("id", entry.getId());
-		itemElement.add((org.dom4j.Element) entryElement);
-		
-		message.setTo(toJID);
-		server.getMessageRouter().route(message);
-		
-	}
-	
 
-	private void notifyDelete(String fromJID, String activityId) {
+    public void deleteMessage(String activityId)  {
 
-		
-		final XMPPServer server = XMPPServer.getInstance();
-		final List<Subscription> subscriptions = getSubscribers(fromJID);
-		
-		// Prepare the message
-		
-		final Message message = new Message();
-		message.setFrom(fromJID);
-		
-		org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
-		org.dom4j.Element itemsElement = eventElement.addElement("items");
-		itemsElement.addAttribute("node", PEPActivityHandler.NODE);
-		org.dom4j.Element retractElement = itemsElement.addElement("retract");
-		retractElement.addAttribute("id", activityId);
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
 
-		// Keep a list of people we sent it to to avoid duplicates
-		List<String> alreadySent = new ArrayList<String>();
-		
-		// Send to this user
-		alreadySent.add(fromJID);
-		message.setTo(fromJID);
-		server.getMessageRouter().route(message);
-		
-		// Send to all subscribers
-		for (Subscription activitySubscription : subscriptions) {
-			String recipientJID = activitySubscription.getSubscriber();
-			alreadySent.add(recipientJID);
-			message.setTo(recipientJID);
-			server.getMessageRouter().route(message);
-		}
-	}
-	
-	private List<String> getGroups(String ownerJID, String userJID) {
-		RosterManager rosterManager = XMPPServer.getInstance().getRosterManager();
-		Roster roster;
-		try {
-			roster = rosterManager.getRoster(new JID(ownerJID).getNode());
-			RosterItem rosterItem = roster.getRosterItem(new JID(userJID));
-			if (rosterItem != null) {
-				return rosterItem.getGroups();
-			}
-		} catch (UserNotFoundException e) {
-		}
+        Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
+        query.setParameter(1, activityId);
+        List<ActivityMessage> messages = query.getResultList();
+        for (ActivityMessage message:messages){
+            em.remove(message);
+        }
 
-		return new ArrayList<String>();
-	}
+        em.getTransaction().commit();
+        em.close();
+    }
 
-	private boolean canSee(String fromJID, ActivityEntry entry, String viewer)
-		throws UserNotFoundException  {
-		// Get a view action
-		final AclAction viewAction = aclFactory.aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT);
-		AclRule rule = null;
-		for (AclRule aclRule : entry.getAclRules()) {
-			if (aclRule.hasAction(viewAction)) {
-				rule = aclRule;
-				break;
-			}
-		}
+    /**
+     * Retrieve the last activities of the target user, taking into account the
+     * access rights of the requesting user.
+     *
+     * @param requestorJID
+     *            the user requesting the activities
+     * @param targetJID
+     *            the user whose activities are requested
+     * @return an immutable list of the last activities of the target entity that can be seen by the
+     *         requesting entity
+     * @throws UserNotFoundException
+     */
+    @SuppressWarnings("unchecked")
+    public List<ActivityEntry> getActivities(String requestorJID, String targetJID)
+        throws UserNotFoundException {
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        Query query = em.createQuery("SELECT DISTINCT entry FROM ActivityEntry entry" +
+                                    "    JOIN entry.rules rule " +
+                                    "    JOIN rule.actions action " +
+                                    "    JOIN rule.subjects subject " +
+                                    "    WHERE entry.actor.uri = :target " +
+                                    "    AND action.name = :view " +
+                                    "    AND action.permission = :grant " +
+                                    "    AND (subject.type = :everyone " +
+                                    "        OR (subject.type = :group_type " +
+                                    "            AND subject.name IN (:groups)) " +
+                                    "        OR (subject.type = :person " +
+                                    "            AND subject.name = :jid)) " +
+                                    "    ORDER BY entry.published DESC");
 
-		// If no view action was found, we consider it is denied
-		if (rule == null) {
-			return false;
-		}
-		
-		return AclManager.canSee(fromJID, rule, viewer);
-	}
+        // Parametrize the query
+        query.setParameter("target", targetJID);
+        query.setParameter("view", AclAction.ACTION_VIEW);
+        query.setParameter("grant", AclAction.PERMISSION_GRANT);
+        query.setParameter("everyone", AclSubject.EVERYONE);
+        query.setParameter("group_type", AclSubject.GROUP);
+        query.setParameter("groups", getGroups(targetJID, requestorJID));
+        query.setParameter("person", AclSubject.PERSON);
+        query.setParameter("jid", requestorJID);
+        query.setMaxResults(20);
+        List<ActivityEntry> result = query.getResultList();
+        em.close();
 
-	/**
-	 * Private constructor to enforce the singleton
-	 */
-	private ActivityManager() {
-		activityFactory = new PersistentActivityFactory();
-		aclFactory = new PersistentAclFactory();
-		atomFactory= new PersistentAtomFactory();
-	}
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * Handle an activity pubsub event. Such a message is usually
+     * received by a user in these conditions: - the local user has subscribed
+     * to the remote user activities - the local user is "mentionned" in this
+     * activity - this activity relates to another activity of the local user
+     *
+     * @param remoteJID
+     *            the entity sending the message
+     * @param localJID
+     *            the entity having received the message
+     * @param activity
+     *            the activity contained in the message
+     * @throws InvalidActivityException
+     * @throws AccessDeniedException
+     */
+    public synchronized void handleMessage(String remoteJID, String localJID, ActivityEntry activity)
+        throws InvalidActivityException, AccessDeniedException {
+
+        // Validate the activity
+        if (activity == null || !activity.hasId()) {
+            throw new InvalidActivityException();
+        }
+
+        // Create a message for the recipient
+        ActivityMessage message = new PersistentActivityMessage();
+        message.setSender(remoteJID);
+        message.setRecipient(localJID);
+        message.setReceived(Calendar.getInstance().getTime());
+
+        // Search if the activity exists in the database
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        PersistentActivityEntry previousActivity = em.find(PersistentActivityEntry.class, activity.getId());
+
+        // Assign the activity to the existing one if it exists
+        if (previousActivity != null) {
+            message.setActivity(previousActivity);
+        } else {
+            message.setActivity(activity);
+        }
+
+        //in case of an update the message will already exist in the DB
+        Query query = em.createQuery("SELECT x FROM Messages x WHERE x.activity.id = ?1");
+        query.setParameter(1, activity.getId());
+        List<ActivityMessage> messages = query.getResultList();
+
+        em.getTransaction().begin();
+        for (ActivityMessage oldMessage : messages){
+            if (oldMessage.getRecipient().equalsIgnoreCase(localJID))
+                em.remove(oldMessage);
+        }
+        em.getTransaction().commit();
+
+        // We go ahead and post the message to the recipient mailbox
+        em.getTransaction().begin();
+        em.persist(message);
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    public synchronized void handleComment(String remoteJID, String localJID, ActivityEntry commentEntry)
+        throws UnauthorizedException, UserNotFoundException,
+            InvalidActivityException, AccessDeniedException {
+
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        em.getTransaction().begin();
+        String parentJID = commentEntry.getParentJID();
+
+        if (parentJID.equalsIgnoreCase(localJID)){
+            // store the comment
+            // first we update it... comment should already have all the links about
+            // being a reply...
+            commentEntry.setId(DefaultAtomHelper.generateId());
+            for (ActivityObject object : commentEntry.getObjects()) {
+                object.setId(DefaultAtomHelper.generateId());
+            }
+            commentEntry.setPublished(Calendar.getInstance().getTime());
+            em.persist(commentEntry);
+        }
+
+        PersistentActivityEntry parentActivity = em.find(PersistentActivityEntry.class, commentEntry.getParentId());
+
+        if (parentActivity == null) {
+            throw new UnauthorizedException();
+        }
+
+        // update original...to increase the number of replies, unless the comment
+        // already exists which means that the activity was already increased once
+
+        String domainOrigin = new JID(parentActivity.getActor().getUri()).getDomain();
+        String domainLocal = new JID(localJID).getDomain();
+
+
+        boolean alreadyUpdated = domainOrigin.equalsIgnoreCase(domainLocal) &&
+            !localJID.equalsIgnoreCase(parentActivity.getActor().getUri());
+
+        if (!alreadyUpdated) {
+            if (parentActivity.hasReplies()) {
+                AtomLink repliesLink = parentActivity.getRepliesLink();
+                parentActivity.removeLink(repliesLink);
+                repliesLink.setCount(repliesLink.getCount() + 1);
+                parentActivity.addLink(repliesLink);
+            } else {
+                parentActivity.addLink(atomFactory.link(null, "replies", null, "application/atom+xml", 1));
+            }
+
+            em.remove(parentActivity);
+            em.persist(parentActivity);
+        }
+
+        em.getTransaction().commit();
+        em.close();
+
+        if (localJID.equalsIgnoreCase(parentActivity.getActor().getUri())) {
+            notify(localJID, commentEntry);
+        }
+    }
+
+    /**
+     * Subscribe an entity to another entity activities.
+     *
+     * @param from the subscriber
+     * @param to entity being subscribed to
+     * @throws AlreadySubscribed
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized void subscribe(String from, String to) {
+
+        // Check if it already exist
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1 AND x.target = ?2");
+        query.setParameter(1, from);
+        query.setParameter(2, to);
+        List<Subscription> subscriptions = query.getResultList();
+
+        // If already exist, we don't have anything left to do
+        if (subscriptions != null && subscriptions.size() > 0) {
+            em.close();
+            return;
+        }
+
+        // Add the subscription
+        Subscription subscription = new PersistentSubscription();
+        subscription.setSubscriber(from);
+        subscription.setTarget(to);
+        subscription.setCreated(Calendar.getInstance().getTime());
+
+        // Store
+        em.getTransaction().begin();
+        em.persist(subscription);
+        em.getTransaction().commit();
+        em.close();
+    }
+
+
+    /**
+     * Delete a subscription.
+     *
+     * @param from the entity requesting to unsubscribe
+     * @param to the subscription target
+     * @throws SubscriptionNotFound
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized void unsubscribe(String from, String to) {
+        EntityManager em  = OswPlugin.getEmFactory().createEntityManager();
+
+        // Check if it already exist
+        Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1 AND x.target = ?2");
+        query.setParameter(1, from);
+        query.setParameter(2, to);
+        List<Subscription> subscriptions = query.getResultList();
+
+        // If it does not exist, we don't have anything left to do
+        if (subscriptions == null || subscriptions.size()== 0) {
+            em.close();
+            return;
+        }
+
+        // Remove the subscriptions
+        // There should never be more than one.. but better safe than sorry
+        em.getTransaction().begin();
+        for (Subscription activitySubscription : subscriptions) {
+            em.remove(activitySubscription);
+        }
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Subscription> getSubscribers(String targetJID) {
+        // Get a list of people who are interested by this stuff
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.target = ?1");
+        query.setParameter(1, targetJID);
+        List<Subscription> subscriptions = query.getResultList();
+        em.close();
+        return subscriptions;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Subscription> getSubscriptions(String subscriberJID) {
+        // Get a list of people who are interested by this stuff
+        final EntityManager em = OswPlugin.getEmFactory().createEntityManager();
+        Query query = em.createQuery("SELECT x FROM Subscriptions x WHERE x.subscriber = ?1");
+        query.setParameter(1, subscriberJID);
+        List<Subscription> subscriptions = query.getResultList();
+        em.close();
+        return subscriptions;
+    }
+
+    private void notify(String fromJID, ActivityEntry entry) throws UserNotFoundException {
+
+        // TODO We may want to do some cleaning of activities before
+        // forwarding them (e.g. remove the acl, it is no one business)
+        final ActivityDomWriter writer = new DefaultActivityDomWriter();
+        final XMPPServer server = XMPPServer.getInstance();
+        final List<Subscription> subscriptions = getSubscribers(fromJID);
+    //    final Roster roster = XMPPServer.getInstance().getRosterManager().getRoster(new JID(fromJID).getNode());
+        final DOMDocument domDocument = new DOMDocument();
+
+        // Prepare the message
+        final Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
+        writer.write(entry, entryElement);
+        domDocument.removeChild(entryElement);
+
+        final Message message = new Message();
+        message.setFrom(fromJID);
+        message.setSubject("New activity");
+
+        String messageBody = "";
+
+        if (entry.hasRecipients()) {
+            messageBody += "Recipients: ";
+
+            for (AtomReplyTo recipient : entry.getRecipients()) {
+                messageBody += recipient.getHref() + "; ";
+            }
+
+            messageBody += "\n\n";
+        }
+
+        messageBody += entry.getTitle();
+
+        message.setBody(messageBody);
+        message.setType(Message.Type.headline);
+        org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
+        org.dom4j.Element itemsElement = eventElement.addElement("items");
+        itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+        org.dom4j.Element itemElement = itemsElement.addElement("item");
+        itemElement.addAttribute("id", entry.getId());
+        itemElement.add((org.dom4j.Element) entryElement);
+
+        // Keep a list of people we sent it to avoid duplicates
+        List<String> alreadySent = new ArrayList<String>();
+
+        // Send to this user
+        if (entry.getParentId()==null){
+            alreadySent.add(fromJID);
+            message.setTo(fromJID);
+            server.getMessageRouter().route(message);
+        }
+
+        // Send to all subscribers
+        for (Subscription activitySubscription : subscriptions) {
+            String recipientJID = activitySubscription.getSubscriber();
+            if (!canSee(fromJID, entry, recipientJID)) {
+                continue;
+            }
+
+            alreadySent.add(recipientJID);
+            message.setTo(recipientJID);
+            server.getMessageRouter().route(message);
+        }
+
+        // Send to recipients, if they can see it and have not already received it
+        if (entry.hasRecipients()) {
+            for (AtomReplyTo recipient : entry.getRecipients()) {
+                // TODO This is dirty, the recipient should be an IRI etc...
+                String recipientJID = recipient.getHref();
+                if (recipientJID == null || recipientJID.length() == 0) {
+                    continue;
+                }
+
+                if (!alreadySent.contains(recipientJID) && canSee(fromJID, entry, recipientJID)) {
+                    alreadySent.add(fromJID);
+
+                    message.setTo(recipientJID);
+                    server.getMessageRouter().route(message);
+                }
+            }
+        }
+    }
+
+    private void notifyComment(String fromJID, String toJID, ActivityEntry entry)
+        throws UserNotFoundException {
+
+        // TODO We may want to do some cleaning of activities before
+        // forwarding them (e.g. remove the acl, it is no one business)
+        final ActivityDomWriter writer = new DefaultActivityDomWriter();
+        final XMPPServer server = XMPPServer.getInstance();
+
+        final DOMDocument domDocument = new DOMDocument();
+
+        // Prepare the message
+        final Element entryElement = (Element) domDocument.appendChild(domDocument.createElementNS(Atom.NAMESPACE, Atom.ENTRY_ELEMENT));
+        writer.write(entry, entryElement);
+        domDocument.removeChild(entryElement);
+
+        final Message message = new Message();
+        message.setFrom(fromJID);
+        message.setBody("New activity: " + entry.getTitle());
+        message.setType(Message.Type.headline);
+        org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
+        org.dom4j.Element itemsElement = eventElement.addElement("items");
+        itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+        org.dom4j.Element itemElement = itemsElement.addElement("item");
+        itemElement.addAttribute("id", entry.getId());
+        itemElement.add((org.dom4j.Element) entryElement);
+
+        message.setTo(toJID);
+        server.getMessageRouter().route(message);
+
+    }
+
+
+    private void notifyDelete(String fromJID, String activityId) {
+
+
+        final XMPPServer server = XMPPServer.getInstance();
+        final List<Subscription> subscriptions = getSubscribers(fromJID);
+
+        // Prepare the message
+
+        final Message message = new Message();
+        message.setFrom(fromJID);
+
+        org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
+        org.dom4j.Element itemsElement = eventElement.addElement("items");
+        itemsElement.addAttribute("node", PEPActivityHandler.NODE);
+        org.dom4j.Element retractElement = itemsElement.addElement("retract");
+        retractElement.addAttribute("id", activityId);
+
+        // Keep a list of people we sent it to to avoid duplicates
+        List<String> alreadySent = new ArrayList<String>();
+
+        // Send to this user
+        alreadySent.add(fromJID);
+        message.setTo(fromJID);
+        server.getMessageRouter().route(message);
+
+        // Send to all subscribers
+        for (Subscription activitySubscription : subscriptions) {
+            String recipientJID = activitySubscription.getSubscriber();
+            alreadySent.add(recipientJID);
+            message.setTo(recipientJID);
+            server.getMessageRouter().route(message);
+        }
+    }
+
+    private List<String> getGroups(String ownerJID, String userJID) {
+        RosterManager rosterManager = XMPPServer.getInstance().getRosterManager();
+        Roster roster;
+        try {
+            roster = rosterManager.getRoster(new JID(ownerJID).getNode());
+            RosterItem rosterItem = roster.getRosterItem(new JID(userJID));
+            if (rosterItem != null) {
+                return rosterItem.getGroups();
+            }
+        } catch (UserNotFoundException e) {
+        }
+
+        return new ArrayList<String>();
+    }
+
+    private boolean canSee(String fromJID, ActivityEntry entry, String viewer)
+        throws UserNotFoundException  {
+        // Get a view action
+        final AclAction viewAction = aclFactory.aclAction(AclAction.ACTION_VIEW, AclAction.PERMISSION_GRANT);
+        AclRule rule = null;
+        for (AclRule aclRule : entry.getAclRules()) {
+            if (aclRule.hasAction(viewAction)) {
+                rule = aclRule;
+                break;
+            }
+        }
+
+        // If no view action was found, we consider it is denied
+        if (rule == null) {
+            return false;
+        }
+
+        return AclManager.canSee(fromJID, rule, viewer);
+    }
+
+    /**
+     * Private constructor to enforce the singleton
+     */
+    private ActivityManager() {
+        activityFactory = new PersistentActivityFactory();
+        aclFactory = new PersistentAclFactory();
+        atomFactory= new PersistentAtomFactory();
+    }
 }

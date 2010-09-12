@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.web;
 
@@ -47,205 +47,203 @@ import org.xmpp.packet.JID;
 @SuppressWarnings("serial")
 public class FileServlet extends HttpServlet {
 
-	private static final long NOTIFICATION_THRESHOLD = 256000;
+    private static final long NOTIFICATION_THRESHOLD = 256000;
 
-	private static int BUFFSIZE = 64000;
+    private static int BUFFSIZE = 64000;
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		final PrintWriter out = response.getWriter();
-		
-		try {
-			processGet(request, response);
-		} catch (MissingParameterException e) {
-			out.println("Missing paramter: " + e.getParameter());
-		} catch (FileNotFoundException e) {
-			out.println("File not found: " + e.getMessage());
-		}
-		catch (Exception e) {
-			out.println("Exception occured: " + e.getMessage());
-			e.printStackTrace(out);		
-		}
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		out.flush();
-	}
+        final PrintWriter out = response.getWriter();
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
-		
-		final PrintWriter out = response.getWriter();
+        try {
+            processGet(request, response);
+        } catch (MissingParameterException e) {
+            out.println("Missing paramter: " + e.getParameter());
+        } catch (FileNotFoundException e) {
+            out.println("File not found: " + e.getMessage());
+        }
+        catch (Exception e) {
+            out.println("Exception occured: " + e.getMessage());
+            e.printStackTrace(out);
+        }
 
-		try {
-			processPost(request, response);
-		} catch (Exception e) {
-			out.println("Exception occured: " + e.getMessage());
-			e.printStackTrace(out);
-		}
+        out.flush();
+    }
 
-		out.flush();
-	}
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException {
 
-	private void processPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		final PrintWriter out = response.getWriter();
-		
-		// 1- Bind this request to a XMPP JID
-		final JID user = getAuthenticatedUser(request);
-		if (user == null) {
-			throw new AuthenticationException();
-		}
+        final PrintWriter out = response.getWriter();
 
-		// 2- Process the file
-		final UploadManager uploadManager = UploadManager.getInstance();
+        try {
+            processPost(request, response);
+        } catch (Exception e) {
+            out.println("Exception occured: " + e.getMessage());
+            e.printStackTrace(out);
+        }
 
-		// Files larger than a threshold should be stored on disk in temporary
-		// storage place
-		final DiskFileItemFactory factory = new DiskFileItemFactory();
-		factory.setSizeThreshold(256000);
-		factory.setRepository(getTempFolder());
+        out.flush();
+    }
 
-		// Prepare the upload parser and set a max size to enforce
-		final ServletFileUpload upload = new ServletFileUpload(factory);
-		upload.setSizeMax(512000000);
+    private void processPost(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        final PrintWriter out = response.getWriter();
 
-		// Get the request ID
-		final String requestId = request.getParameter("requestId");
+        // 1- Bind this request to a XMPP JID
+        final JID user = getAuthenticatedUser(request);
+        if (user == null) {
+            throw new AuthenticationException();
+        }
 
-		// Create a progress listener
-		ProgressListener progressListener = new ProgressListener() {
-			private long lastNotification = 0;
+        // 2- Process the file
+        final UploadManager uploadManager = UploadManager.getInstance();
 
-			public void update(long pBytesRead, long pContentLength, int pItems) {
-				if (lastNotification == 0 || (pBytesRead - lastNotification) > NOTIFICATION_THRESHOLD) {
-					lastNotification = pBytesRead;
-					UploadManager.getInstance().updateProgress(user, pBytesRead, pContentLength, requestId);
-				}
-			}
-		};
-		upload.setProgressListener(progressListener);
+        // Files larger than a threshold should be stored on disk in temporary
+        // storage place
+        final DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(256000);
+        factory.setRepository(getTempFolder());
 
-		// Process the upload
-		List items = upload.parseRequest(request);
-		for (Object objItem : items) {
-			FileItem item = (FileItem) objItem;
-			if (!item.isFormField()) {
-				String fileID = UUID.randomUUID().toString();
-				File target = new File(getUploadFolder(), fileID);
-				item.write(target);
-				UploadManager.getInstance().commitFile(user, target, item.getName(), requestId);
-				break; // Store only one file
-			}
-		}
-	}
+        // Prepare the upload parser and set a max size to enforce
+        final ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(512000000);
 
-	private void processGet(HttpServletRequest request, HttpServletResponse response) throws MissingParameterException, IOException, InvalidParameterValueException {
+        // Get the request ID
+        final String requestId = request.getParameter("requestId");
 
-		// Validate the request token
-		// TODO
+        // Create a progress listener
+        ProgressListener progressListener = new ProgressListener() {
+            private long lastNotification = 0;
 
-		// Process the parameters
-		String fileId = request.getParameter("fileId");
-		if (fileId == null || fileId.isEmpty()) {
-			throw new MissingParameterException("fileId");
-		}
+            public void update(long pBytesRead, long pContentLength, int pItems) {
+                if (lastNotification == 0 || (pBytesRead - lastNotification) > NOTIFICATION_THRESHOLD) {
+                    lastNotification = pBytesRead;
+                    UploadManager.getInstance().updateProgress(user, pBytesRead, pContentLength, requestId);
+                }
+            }
+        };
+        upload.setProgressListener(progressListener);
 
-		// Get the file entry
-		FileEntry fileEntry = UploadManager.getInstance().getFile(fileId);
-		if (fileEntry == null) {
-			throw new FileNotFoundException(fileId);
-		}
+        // Process the upload
+        List items = upload.parseRequest(request);
+        for (Object objItem : items) {
+            FileItem item = (FileItem) objItem;
+            if (!item.isFormField()) {
+                String fileID = UUID.randomUUID().toString();
+                File target = new File(getUploadFolder(), fileID);
+                item.write(target);
+                UploadManager.getInstance().commitFile(user, target, item.getName(), requestId);
+                break; // Store only one file
+            }
+        }
+    }
 
-		// Open the file
-		File file = new File(getUploadFolder(), fileEntry.getId());
-		if (!file.exists()) {
-			throw new FileNotFoundException(fileEntry.getName());
-		}
+    private void processGet(HttpServletRequest request, HttpServletResponse response) throws MissingParameterException, IOException, InvalidParameterValueException {
 
-		// Process the file
-		String pSize = request.getParameter("size");
-		if (pSize != null) {
-		}
-			
-		DataInputStream is = new DataInputStream(new FileInputStream(file));
+        // Validate the request token
+        // TODO
 
-		// Send the headers
-		response.setContentType(fileEntry.getType());
-		response.setContentLength((int) fileEntry.getSize());
-		//response.setHeader("Content-Disposition", "attachment; filename=\"" + fileEntry.getName() + "\"");
+        // Process the parameters
+        String fileId = request.getParameter("fileId");
+        if (fileId == null || fileId.isEmpty()) {
+            throw new MissingParameterException("fileId");
+        }
 
-		// Stream the file
-		final byte[] bbuf = new byte[BUFFSIZE];
-		final OutputStream os = response.getOutputStream();
+        // Get the file entry
+        FileEntry fileEntry = UploadManager.getInstance().getFile(fileId);
+        if (fileEntry == null) {
+            throw new FileNotFoundException(fileId);
+        }
 
-		int length = 0;
-		while ((is != null) && ((length = is.read(bbuf)) != -1)) {
-			os.write(bbuf, 0, length);
-		}
+        // Open the file
+        File file = new File(getUploadFolder(), fileEntry.getId());
+        if (!file.exists()) {
+            throw new FileNotFoundException(fileEntry.getName());
+        }
 
-		is.close();
-		os.flush();
-		os.close();
-	}
+        // Process the file
+        String pSize = request.getParameter("size");
+        if (pSize != null) {
+        }
 
-	private JID getAuthenticatedUser(HttpServletRequest request) throws MissingParameterException {
-		// Fetch the parameters
-		String jid = request.getParameter("jid");
-		String signature = request.getParameter("signature");
+        DataInputStream is = new DataInputStream(new FileInputStream(file));
 
-		// Validate
-		if (jid == null) {
-			throw new MissingParameterException("jid");
-		}
-		if (signature == null) {
-			throw new MissingParameterException("signature");
-		}
+        // Send the headers
+        response.setContentType(fileEntry.getType());
+        response.setContentLength((int) fileEntry.getSize());
+        //response.setHeader("Content-Disposition", "attachment; filename=\"" + fileEntry.getName() + "\"");
 
-		// Validate the session
-		try {
-			if (SessionValidator.getInstance().validateSession(jid, signature)) {
-				return new JID(jid);
-			} else {
-				return null;
-			}
-		} catch (Exception e) {
-			return null;
-		}
-	}
+        // Stream the file
+        final byte[] bbuf = new byte[BUFFSIZE];
+        final OutputStream os = response.getOutputStream();
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
+        int length = 0;
+        while ((is != null) && ((length = is.read(bbuf)) != -1)) {
+            os.write(bbuf, 0, length);
+        }
 
-		// Exclude this servlet from requering the user to login
-		AuthCheckFilter.addExclude("osw-openfire-plugin");		
-		AuthCheckFilter.addExclude("osw-openfire-plugin/file/");
-		AuthCheckFilter.addExclude("osw-openfire-plugin/form.html");
-		
-		
-		}
+        is.close();
+        os.flush();
+        os.close();
+    }
 
-	private File getTempFolder() {	
-		final String tempPath = JiveGlobals.getProperty("onesocialweb.path.temp");
-		if (tempPath != null) {
-			File tempFolder = new File(tempPath);
-			if (tempFolder.exists() && tempFolder.canWrite()) {
-				return tempFolder;
-			}
-		}
-		
-		return null;
-	}
-	
-	private File getUploadFolder() {	
-		final String uploadPath = JiveGlobals.getProperty("onesocialweb.path.upload");
-		if (uploadPath != null) {
-			File uploadFolder = new File(uploadPath);
-			if (uploadFolder.exists() && uploadFolder.canWrite()) {
-				return uploadFolder;
-			}
-		}
-		
-		return null;
-	}
+    private JID getAuthenticatedUser(HttpServletRequest request) throws MissingParameterException {
+        // Fetch the parameters
+        String jid = request.getParameter("jid");
+        String signature = request.getParameter("signature");
+
+        // Validate
+        if (jid == null) {
+            throw new MissingParameterException("jid");
+        }
+        if (signature == null) {
+            throw new MissingParameterException("signature");
+        }
+
+        // Validate the session
+        try {
+            if (SessionValidator.getInstance().validateSession(jid, signature)) {
+                return new JID(jid);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+
+        // Exclude this servlet from requering the user to login
+        AuthCheckFilter.addExclude("osw-openfire-plugin");
+        AuthCheckFilter.addExclude("osw-openfire-plugin/file/");
+        AuthCheckFilter.addExclude("osw-openfire-plugin/form.html");
+    }
+
+    private File getTempFolder() {
+        final String tempPath = JiveGlobals.getProperty("onesocialweb.path.temp");
+        if (tempPath != null) {
+            File tempFolder = new File(tempPath);
+            if (tempFolder.exists() && tempFolder.canWrite()) {
+                return tempFolder;
+            }
+        }
+
+        return null;
+    }
+
+    private File getUploadFolder() {
+        final String uploadPath = JiveGlobals.getProperty("onesocialweb.path.upload");
+        if (uploadPath != null) {
+            File uploadFolder = new File(uploadPath);
+            if (uploadFolder.exists() && uploadFolder.canWrite()) {
+                return uploadFolder;
+            }
+        }
+
+        return null;
+    }
 }

@@ -12,7 +12,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *    
+ *
  */
 package org.onesocialweb.openfire.model.relation;
 
@@ -23,14 +23,13 @@ import org.onesocialweb.xml.dom.RelationDomReader;
 
 public class PersistentRelationDomReader extends RelationDomReader {
 
-	@Override
-	protected AclDomReader getAclDomReader() {
-		return new PersistentAclDomReader();
-	}
+    @Override
+    protected AclDomReader getAclDomReader() {
+        return new PersistentAclDomReader();
+    }
 
-	@Override
-	protected RelationFactory getRelationFactory() {
-		return new PersistentRelationFactory();
-	}
-
+    @Override
+    protected RelationFactory getRelationFactory() {
+        return new PersistentRelationFactory();
+    }
 }
