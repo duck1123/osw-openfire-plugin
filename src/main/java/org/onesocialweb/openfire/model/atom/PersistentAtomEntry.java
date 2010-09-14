@@ -26,12 +26,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.onesocialweb.model.atom.AtomCategory;
 import org.onesocialweb.model.atom.AtomContent;
 import org.onesocialweb.model.atom.AtomEntry;
+import org.onesocialweb.model.atom.AtomGenerator;
 import org.onesocialweb.model.atom.AtomLink;
 import org.onesocialweb.model.atom.AtomPerson;
 import org.onesocialweb.model.atom.AtomReplyTo;
@@ -57,6 +59,9 @@ public class PersistentAtomEntry extends PersistentAtomCommon implements AtomEnt
 
     @OneToMany(cascade=CascadeType.ALL, targetEntity=PersistentAtomLink.class, fetch=FetchType.EAGER)
     private List<AtomLink> links = new ArrayList<AtomLink>();
+
+    @OneToOne(cascade=CascadeType.ALL, targetEntity=PersistentAtomGenerator.class, fetch=FetchType.EAGER)
+    private AtomGenerator generator = null;
 
     @Id
     private String id;
@@ -131,6 +136,26 @@ public class PersistentAtomEntry extends PersistentAtomCommon implements AtomEnt
     @Override
     public void setParentJID(String parentJID) {
         this.parentJID = parentJID;
+    }
+
+    @Override
+    public void setGenerator(AtomGenerator generator) {
+        this.generator = generator;
+    }
+
+    @Override
+    public AtomGenerator getGenerator() {
+        return generator;
+    }
+
+    @Override
+    public void removeGenerator() {
+        this.generator = null;
+    }
+
+    @Override
+    public boolean hasGenerator() {
+        return generator != null;
     }
 
     @Override

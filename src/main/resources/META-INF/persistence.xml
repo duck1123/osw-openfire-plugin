@@ -13,6 +13,7 @@
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomCategory</class>        
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomContent</class>
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomEntry</class>
+    <class>org.onesocialweb.openfire.model.atom.PersistentAtomGenerator</class>
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomLink</class>
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomPerson</class>
     <class>org.onesocialweb.openfire.model.atom.PersistentAtomSource</class>     
