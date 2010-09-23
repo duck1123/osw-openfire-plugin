@@ -585,9 +585,9 @@ public class ActivityManager {
 		// Send to recipients, if they can see it and have not already received it
 		if (entry.hasRecipients()) {
 			for (AtomReplyTo recipient : entry.getRecipients()) {
-				// TODO This is dirty, the recipient should be an IRI etc...
+				//TODO This is dirty, the recipient should be an IRI etc...
 				String recipientJID = recipient.getHref();
-				if (recipientJID == null || recipientJID.length() == 0) {
+				if ((recipientJID==null) || (recipientJID.length()==0) || (recipientJID.contains(";node=urn:xmpp:microblog"))) {
 					continue;
 				}
 				
