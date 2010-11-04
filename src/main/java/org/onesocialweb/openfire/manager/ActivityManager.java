@@ -603,8 +603,6 @@ public class ActivityManager {
 		
 		final Message message = new Message();
 		message.setFrom(fromJID);
-		message.setBody("Delete activity: " + entry.getId());
-		message.setType(Message.Type.normal);
 		
 		org.dom4j.Element eventElement = message.addChildElement("event", "http://jabber.org/protocol/pubsub#event");
 		org.dom4j.Element itemsElement = eventElement.addElement("items");
