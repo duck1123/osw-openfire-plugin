@@ -20,6 +20,7 @@ import org.onesocialweb.model.atom.AtomCategory;
 import org.onesocialweb.model.atom.AtomContent;
 import org.onesocialweb.model.atom.AtomEntry;
 import org.onesocialweb.model.atom.AtomFactory;
+import org.onesocialweb.model.atom.AtomGenerator;
 import org.onesocialweb.model.atom.AtomLink;
 import org.onesocialweb.model.atom.AtomPerson;
 import org.onesocialweb.model.atom.AtomReplyTo;
@@ -62,4 +63,8 @@ public class PersistentAtomFactory extends AtomFactory {
 		return new PersistentAtomReplyTo();
 	}
 
+	@Override
+	public AtomGenerator generator() {
+		return new PersistentAtomGenerator();
+	}
 }

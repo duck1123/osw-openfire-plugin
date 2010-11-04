@@ -139,6 +139,11 @@ public class PersistentActivityEntry extends PersistentAtomEntry implements Acti
 		for (ActivityObject object : objects) {
 			buffer.append(object.toString());
 		}
+
+		if (hasGenerator()) {
+			buffer.append("generator: " + getGenerator().toString() + " ");
+		}
+
 		for (AclRule rule : rules) {
 			buffer.append(rule.toString());
 		}
