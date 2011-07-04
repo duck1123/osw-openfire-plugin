@@ -17,7 +17,7 @@
 package org.onesocialweb.openfire.manager;
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.Collections;
 import java.util.List;
 
@@ -131,7 +131,7 @@ public class ActivityManager {
 			
 		}
 		entry.setActor(actor);
-		entry.setPublished(Calendar.getInstance().getTime());
+		entry.setPublished(new Date());
 		em.persist(entry);
 		em.getTransaction().commit();
 		em.close();
@@ -169,9 +169,9 @@ public class ActivityManager {
 			throw new UnauthorizedException();
 	
 		oldEntry.setActor(actor);
-		oldEntry.setUpdated(Calendar.getInstance().getTime());
+		oldEntry.setUpdated(new Date());
 		for (ActivityObject obj: oldEntry.getObjects()){
-			obj.setUpdated(Calendar.getInstance().getTime());
+			obj.setUpdated(new Date());
 		}
 		oldEntry.setTitle(entry.getTitle());
 		
@@ -367,11 +367,11 @@ public class ActivityManager {
 				throw new AccessDeniedException("User does not have the rights to modify this activity");
 			//due to popular demand, we will move to the top of the inbox any updated or commented message
 			//message.setReceived(previousActivity.getPublished());
-			message.setReceived(Calendar.getInstance().getTime());
+			message.setReceived(new Date());
 			em.remove(previousActivity);			
 		}
 		else
-			message.setReceived(Calendar.getInstance().getTime());
+			message.setReceived(new Date());
 		
 		em.getTransaction().commit();
 
@@ -399,7 +399,7 @@ public class ActivityManager {
 		for (ActivityObject object : commentEntry.getObjects()) {
 			object.setId(DefaultAtomHelper.generateId());
 		}														
-		commentEntry.setPublished(Calendar.getInstance().getTime());
+		commentEntry.setPublished(new Date());
 		
 		//setting the acl-rules, same visibility as the parent...
 		commentEntry.setAclRules(parentActivity.getAclRules());
@@ -452,7 +452,7 @@ public class ActivityManager {
 		Subscription subscription = new PersistentSubscription();
 		subscription.setSubscriber(from);
 		subscription.setTarget(to);
-		subscription.setCreated(Calendar.getInstance().getTime());
+		subscription.setCreated(new Date());
 		
 		// Store
 		em.getTransaction().begin();
