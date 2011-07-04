@@ -60,7 +60,13 @@ public class PersistentAtomContent extends PersistentAtomCommon implements AtomC
 
 	@Override
 	public void setValue(final String value) {
-		this.value = value;
+        if (value != null) {
+            if (value.length() > 254) {
+                this.value = value.substring(0, 254);
+            } else {
+                this.value = value;
+            }
+        }
 	}
 	
 	@Override

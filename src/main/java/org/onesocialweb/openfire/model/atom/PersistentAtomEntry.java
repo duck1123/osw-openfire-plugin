@@ -370,7 +370,13 @@ public class PersistentAtomEntry extends PersistentAtomCommon implements AtomEnt
 
 	@Override
 	public void setTitle(final String title) {
-		this.title = title;
+        if (title != null) {
+            if (title.length() > 254) {
+                this.title = title.substring(0, 254);
+            } else {
+                this.title = title;
+            }
+        }
 	}
 
 	@Override
